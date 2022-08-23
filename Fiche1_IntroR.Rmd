@@ -1,0 +1,543 @@
+---
+title: 'Fiche 1 : Introduction à R'
+output:
+  html_document: default
+  html_notebook: default
+date: "Septembre 2022"
+editor_options: 
+  chunk_output_type: console
+---
+
+Le langage de programmation R est gratuit et très souvent mis à jour par sa communauté. Si vous ne l'avez pas déjà sur votre ordinateur, vous pouvez le télécharger sur le site de CRAN :
+http://cran.univ-lyon1.fr/
+
+Une interface agréable est RStudio, que l'on peut télécharger ici : https://www.rstudio.com/products/rstudio/download/
+
+Le logiciel R est très utilisé en Statistique car la plupart des méthodes (même récentes) pour l'analyse et la visualisation de données y sont implémentées. Nous verrons que les fonctions déjà implémentées sur R sont regroupées (par thème d'utilisation) dans des packages. Certains de ces packages sont chargés en mémoire quand R démarre, notamment (liste non exhaustive): 
+
+* **base**: fonctions de base de R
+* **graphics**: graphiques de base
+* **stats**: fonctions statistiques
+
+Les autres packages doivent être installés (s'ils ne le sont pas déjà) et chargés avant d'être utilisés. 
+
+```{r eval=F}
+library(gridExtra) #chargement du package gridExtra
+```
+
+Dans la plupart des cas, l'installation peut se faire assez simplement (par exemple sur Rstudio en cliquant sur Packages puis Install ou bien en tapant install.packages("nom_du_package")).
+
+Les fiches de ce cours sont inspirées des cours de plusieurs collègues : Arnaud Guyader, Félix Cheysson, Julien Chiquet...
+
+# Création d'un document Rmarkdown
+ Un document Rmarkdown permet de créer un rapport qui mélange du code R et du LaTeX. Le document peut ensuite être compilé en un document pdf ou html.
+ On crée un nouveau document : `RStudio` (`File -> New file -> Rmarkdown`).
+ Le code doit être contenu dans des cellules délimitées par ```` ``` ````. On crée une nouvelle cellule de la façon suivante : `Ctrl+Alt+I` (ou `Code > Insert Chunk`)
+ 
+Dans le reste du document, on peut écrire du texte au format Rmarkdown :
+
+ * `#`, `##`, `###`, ... créent des sections, sous-sections, sous-sous-sections, ...
+ 
+  * Le texte délimité par `` ` `` produit du code verbatim 
+  
+  * Du texte délimité par `*` et `**` produit du text en italique et en gras respectivement
+  
+  * Du texte délimité par `</>` produit des hypertextes
+  
+  * On peut inclure des commandes LaTeX `$E = mc^2$`
+
+Pour compiler le document :
+
+* Le document entier `Knit ->Knit to html` ou `Knit ->Knit to pdf` ou `Ctrl+Shift+K`
+
+Pour éxécuter une cellule de code : Flèches en haut à droite de chaque cellule (juste la cellule ou toutes celles avant). 
+
+
+
+# 1. Création d'objets
+
+## 1.1. Scalaires
+
+
+Pour une création d'objet, plusieurs syntaxes sont possibles :
+```{r}
+x <- 2
+y = 3
+x+y -> z
+z
+```
+
+## 1.2. Scalaires chaînes
+Un exemple :
+```{r}
+x <- "La mort"
+y <- "aux trousses"
+paste(x,y)
+```
+
+## 1.3. Vecteurs
+### Création
+Voici les principales méthodes pour construire un vecteur :
+
+* par la fonction collecteur **c** :
+```{r}
+x <- c(5.6,-2,78,42.3)
+y <- c(x,3,c(12,8))
+y
+```
+* par le symbole **:** pour une séquence arithmétique de raison +1 ou -1:
+```{r}
+x = 1:6
+x
+```
+* par la fonction **seq** pour une séquence arithmétique plus générale :
+```{r}
+seq(1,6,by=0.5)
+seq(1,6,length=5)
+```
+* par la fonction de réplication **rep** :
+```{r}
+rep(1,4)
+rep(c(1,2),each=3)
+```
+
+Pour presenter des résultats, on peut concaténer un chaîne de caractère et un scalaire avec la fonction **paste** (la sortie sera une chaine de caractère):
+
+```{r}
+paste("Le résultat est ", 1)
+```
+
+
+### Extraction
+
+L'extraction s'effectue à partir des indices des éléments du vecteur que l'on souhaite extraire :
+```{r}
+x <- 15:25
+x[2]
+x[2:5] 
+x[c(1,3,5,7)] 
+```
+
+On peut aussi retourner le vecteur à l'exception de certains éléments : 
+
+```{r}
+x[-9]
+x[-c(1,3,4)]
+```
+
+On peut ne garder que les éléments d'un vecteur qui vérifient certaine condition avec la fonction **which** :
+
+```{r}
+x <- -10:10
+which(x>0)
+x[which(x>0)]
+```
+
+### Opérations
+Les opérations sur les vecteurs s'effectuent élément par élément :
+
+```{r}
+x <- 1:5
+y <- 3:7
+x+y
+x*y
+```
+On peut aussi appliquer des opérateurs booléens comme ==, !=, >, >=, etc. Par exemple :
+```{r}
+y <- x>3
+y
+z = x[x<=3]
+z
+```
+
+
+## 1.4. Matrices
+
+### Création
+
+La principale méthode pour créer une matrice est d'utiliser la fonction **matrix** qui prend en arguments les coefficients de la matrice ainsi que son nombre de lignes (ou de colonnes)  :
+
+```{r}
+m <- matrix(1:6, ncol=2)
+m     
+m <- matrix(1:8, nrow=2)
+m
+```
+Par défaut, R range les valeurs par colonne. Pour ranger par ligne, on utilise l'argument **byrow** :
+
+```{r}
+m <- matrix(1:8, nrow=2, byrow=TRUE)
+m
+```
+
+### Extraction
+L'emplacement d'un élément dans une matrice est donné par ses indices de ligne et de colonne :
+```{r}
+m[1,3]
+```
+Il est rare qu'on ait besoin de ne sélectionner qu'un élément d'une matrice. Usuellement, on sélectionne une ou plusieurs lignes et/ou une ou plusieurs colonnes. Exemples :
+
+* Sélection par des entiers positifs :
+```{r}
+m[2,]
+```
+* Sélection par des entiers négatifs :
+```{r}
+m[-1,] 
+m[1:2,-1]
+```
+
+### Opérations
+Attention au fait que le produit par * ne donne pas le produit de 2 matrices au sens usuel de l'algèbre linéaire (mais le produit terme à terme des éléments de la matrice), idem pour l'exponentielle d'une matrice, etc.
+
+```{r}
+m <- matrix(1:4, ncol=2)
+m
+n <- matrix(3:6, ncol=2, byrow=TRUE)
+n
+m + n
+m * n    
+m %*% n 
+```
+
+Exemples de fonctions classiques en algèbre linéaire :
+```{r}
+det(m) 
+solve(m) 
+eigen(m)
+```
+
+## 1.5. Listes
+Les listes permettent de regrouper différents objets. Elles permettent, par exemple, de stocker dans un même objet un vecteur et une matrice :
+
+```{r}
+vec <- c(1,2,3)
+mat <- matrix(1,ncol=2,nrow=3)
+L <- list(vec,mat)
+L
+```
+
+L'objet **L** ainsi créé est une liste de longueur 2. La première composante est le vecteur **vec**, la seconde la matrice **mat**. On extrait les composantes d'une liste à l'aide de doubles crochets :
+```{r}
+L[[1]]
+```
+
+Il est également possible, et souvent utile, de donner des noms aux différentes composantes d'une liste. Ceci peut se faire grâce à la fonction **names** :
+
+```{r}
+names(L) <- c("vecteur","matrice")
+L
+```
+Dans ce cas, l'extraction peut toujours se faire via les doubles crochets ou bien à partir des noms des différentes composantes, le symbole **$** séparant le nom de la liste du nom de la composante :
+
+```{r}
+L$vecteur
+```
+
+De nombreuses fonctions de R renvoient un résultat sous la forme d'une liste, c'est le cas par exemple de la fonction **eigen** vue ci-dessus, dont on liste les éléments via la fonction **ls**. Exemple :
+
+
+```{r}
+m <- matrix(1:4,ncol=2)
+dec <- eigen(m)
+ls(dec)
+dec$values  
+dec$vectors 
+```
+
+## 1.6. Data-frames (tableaux de données)
+Les data-frames sont les objets typiques pour faire des statistiques sous R. Ce sont des listes particulières dont les composantes sont de même longueur, mais de types éventuellement différents. Les tableaux de données utilisés en statistique, de forme (individus,variables), doivent être mis sous la forme d'un data-frame. En effet, un tableau de données est constitué de variables quantitatives et/ou qualitatives mesurées sur les mêmes individus. Les data-frames permettent de tenir compte de la nature de chaque variable. Considérons un jeu de données de 6 individus et 2 variables :
+```{r}
+age <- c(17,28,64,8,25,36)
+sexe <- c("H","F","F","H","H","F")
+donnees <- data.frame(age,sexe)
+donnees
+```
+L'extraction d'éléments peut se faire :
+
+* comme pour une matrice :
+```{r}
+donnees[3,1]
+donnees[4,]
+donnees[,2]
+```
+
+* comme pour une liste :
+```{r}
+donnees[[2]]
+donnees$sexe
+```
+
+La fonction **names** permet de retrouver les noms des variables, ce qui peut être utile lorsque le tableau de données contient beaucoup de variables :
+
+```{r}
+names(donnees)
+```
+
+Remarque importante: Tous ces objets (scalaire, scalaire chaîne, matrice, vecteur, liste, data-frame) ont un type particulier, appelée la classe, qui aura une conséquence sur la façon dont R les traite (certaines fonctions ne prennent en argument que des objets de type "matrix" par exemple). Il faut garder en tête que la classe d'un objet est extrêmement importante car beaucoup d'erreurs de code proviennent de mauvaises gestions des classes d'objet. Pour les éviter, il est parfois impératif de vérifier les classes des objets avec la fonction **class**: 
+
+```{r}
+class(x)
+class(m)
+class(L)
+class(donnees)
+```
+
+Dans l'interface de RStudio, il est facile de voir les différents objets en mémoire dans Environment. La fonction **ls** permet également d’afficher une liste simple (seulement les noms) des objets en mémoire.
+
+```{r}
+ls()
+```
+
+
+# 2. Programmer en R
+
+## 2.1. Les boucles (for ou while)
+De manière générale, la boucle **for** s'écrit :
+
+
+
+```{r eval=F}
+for (i in vecteur){
+  expr1
+  expr2
+  ...
+}
+```
+
+Une autre possibilité de boucle est la condition **while**. Sa syntaxe générale est la suivante :
+```{r eval=F}
+while (condition){
+  expr1
+  expr2
+  ...
+}
+```
+
+## 2.2. Les conditions "if, else"
+Sous sa forme générale, la condition "**if, else**" s'écrit :
+```{r eval=F}
+if (condition){
+  expr1
+  expr2
+  ...
+}else{
+  expr3
+  expr4
+  ...
+}
+```
+Attention, l'ordre **else** doit être sur la même ligne que l'accolade fermante "}" de la clause **if**.
+
+## 2.3. Les fonctions
+
+Une fonction permet d'effectuer un certain nombre d'instructions R, qui dépendent généralement d'arguments spécifiés en entrée. La fonction fournit un résultat unique, qui est désigné à l'intérieur de la fonction par **return**. En l'absence de cette instruction, la fonction renvoit comme résultat le dernier résultat obtenu dans celle-ci. Donnons un exemple simple, à savoir la somme des $n$ premiers entiers. Le nombre $n$ est un entier qui est l'argument
+d'entrée, le résultat est simplement la somme demandée :
+```{r}
+somme <- function(n){return(sum(1:n))}
+```
+
+La fonction est ensuite appelée grâce à son nom (ici, **somme**), suivi du (ou des) argument(s) en entrée entre parenthèses. Ainsi :
+```{r}
+somme(3)
+```
+
+
+Une remarque évidente : il ne faut surtout pas donner à une fonction que vous créez le nom d'une fonction existant déjà en R. Dans l'exemple précédent, il fallait ainsi éviter de l'appeler **sum**. 
+
+Pour la suite, voici la fonction la plus utile (la seule qu'il faut impérativement connaître!) pour retrouver facilement les arguments, l'utilité et les sorties des fonctions déjà implémentées sur R: 
+
+```{r}
+help(sum)
+```
+
+### Quelques fonctions très classiques (à tester)
+Pour des entiers : **floor** , **abs**
+
+Pour les vecteurs : **length**, **sum**, **order**, **sample**, **max**, **min**,**which.max**, **which.min**, **mean**,**var**,**sd**
+
+Pour les matrices/les tableaux : **dim**, **ncol**, **nrow**, **head**
+
+
+
+### Les variables aléatoires 
+
+Les fonctions de type **rfunc** permettent de générer des variables aléatoires (où "func" spécifie la loi de la variable)
+
+```{r}
+rnorm(10,0,1) ## échantillon de taille 10 d'une loi normale centrée réduite
+rpois(5,2) ## échantillon de taille 5 d'une loi de Poisson de paramètre 2
+runif(1,0,2) ## échantillon de taille 1 d'une loi uniforme sur [0,1]
+```
+
+Les fonctions **pfunc**, **qfunc** et **dfunc** donnent respectivement la fonction de répartition, le quantile et la densité.
+
+
+## Le calcul vectoriel 
+
+Pour calculer une expression algébrique, on préférera (presque) toujours utiliser un calcul vectoriel plutôt qu'une boucle.
+Par exemple si on souhaite calculer $\sum_{k=0}^{n} \frac{x^k}{k!}$.
+
+
+```{r}
+## Version boucle 
+
+exp_loop=function(x,n)
+{
+  res<-1
+  for (k in 1:n)
+  {res <- res + x^k/factorial(k)}
+  res
+  }
+
+## Version vectorielle
+exp_vec=function(x,n)
+{
+  sum(x^(0:n)/factorial(0:n))
+}
+
+exp_loop(2,10)
+exp_vec(2,10)
+```
+
+### La fonction apply
+
+La fonction apply permet d'appliquer une même fonction à tous les éléments d'une ligne ou d'une colonne d'une matrice 
+
+```{r}
+M=matrix(1:6,ncol=2)
+M
+apply(M,1,sum) ## on calcule la somme de chaque ligne
+apply(M,2,mean) ## on calcule la moyenne de chaque colonne
+
+```
+
+### Les fonctions sapply et lapply
+
+La fonction **lapply** permet d'appliquer  une même fonction à tous les éléments d'une liste, d'une vecteur ou d'un tableau et renvoie une liste. La fonction **sapply** fait la même chose et renvoie une matrice ou un tableau.
+
+
+```{r}
+M=data.frame(x=1:5,y=2:6)
+lapply(M,mean)
+sapply(M,mean)
+sapply(1:10,FUN=function(i){i^2+3})
+
+```
+
+
+### Temps de calcul
+La librairie **microbenchmark** permet de comparer les temps de calcul de plusieurs fonctions. 
+
+```{r}
+library(microbenchmark)
+microbenchmark(loop=exp_loop(2,1000),vec= exp_vec(2,1000),times=10)
+microbenchmark(loop=exp_loop(2,10000),vec= exp_vec(2,10000),times=10)
+```
+
+La version vectorielle est bien plus rapide en moyenne, et l'écart d'autant plus important que n augmente.
+
+## 2.4 Les graphes
+
+On va passer très vite sur cette partie car la prochaine séance sera dédiée à l'utilisation du package **ggplot** qui permet de faire de bien plus jolis graphes que les fonctions de base de R. On donne juste ici la syntaxe pour faire un graphe avec la fonction **plot** :
+
+```{r}
+x=seq(-5,5,0.01)
+y=dnorm(x,0,1)
+plot(x,y,"l")
+```
+
+Pour tracer une autre courbe sur le même graphe, on utilise la fonction **lines** :
+
+
+```{r}
+x=seq(-5,5,0.01)
+y=dnorm(x,0,1)
+plot(x,y,"l")
+y2=dnorm(x,-1,1)
+lines(x,y2,col="red")
+```
+
+# 3. Exercices
+On commencera par créer un dossier pour l'ensemble de ce cours, intitulé par exemple "Mise à Niveau R". Il suffit alors, sous RStudio, d'aller dans `Session -> Set Working Directory -> Choose Directory`  et de se placer dans le dossier "Mise à Niveau R". Ensuite, aller dans `File -> New file -> Rmarkdown`. Ceci permet de créer un fichier Rmarkdown dans lequel vous pourrez faire les exercices suivants. 
+
+## 3.1. Sélection et tri dans un data-frame
+Le jeu de données **iris** est disponible sous R. Il suffit de taper **data(iris)** pour le charger.
+
+1. Obtenir un résumé de ce jeu de données grâce à la fonction **summary**. Quelles sont ses dimensions ?
+2. Retrouver les dimensions de ce jeu de données grâce à la fonction **dim**.
+3. Visualiser ses cinq premières lignes.
+4. Créer un nouveau data-frame, que vous appellerez **iris2**, comportant uniquement les données de la modalité **versicolor** de la variable **Species**.
+5. Trier par ordre croissant les données de **iris2** en fonction de la variable **Petal.Length** (vous pourrez utiliser la fonction **order**). Stocker le résultat dans un data-frame **iris3**. Vérifier le résultat sur les premières lignes de ce nouveau data-frame grâce à la fonction **head**.
+
+
+## 3.2. Retrouver un nombre mystère
+On étudie le nombre de tirages au hasard nécessaires pour retrouver un nombre fixé entre 0 et $n$.
+
+1. Choisir un entier entre 0 et $n=10$, le stocker sous le nom **myst**. Ensuite, créer une boucle qui, à chaque itération, tire un entier au hasard entre 0 et $n=10$ jusqu'à obtenir **myst** (on pourra utiliser la fonction **sample** dont on consultera l'aide). En sortie de boucle, le nombre de tirages effectués sera renvoyé.
+2. A partir de la question précédente, créer une fonction prenant en entrée les entiers $n$ et **myst**, et donnant en sortie le nombre de tirages nécessaires pour retrouver **myst**.
+3. Pour $n=10$ et le même **myst** qu'en première question, appliquer cette fonction $M=100$ fois et stocker le résultat dans un vecteur **res**. Donner la moyenne de **res** et son écart-type. Quels sont les résultats attendus théoriquement ?
+4. Si vous avez utilisé une boucle à la question précédente, la refaire en utilisant la fonction **apply**.
+
+## 3.3. La conjecture de Syracuse
+L'algorithme de Syracuse, ou algorithme $3x+1$, fonctionne comme suit : à partir d'un entier naturel $n\in\mathbb{N}^\star$, si $n$ est pair on le divise par deux, si $n$ est impair on le multiplie par 3 et on ajoute 1. On répète ensuite l'opération avec le nombre obtenu, la conjecture étant qu'on finit par atteindre 1 et boucler indéfiniment : en effet, à partir de ce nombre, on tombe sur le cycle 1,4,2.
+
+1. Créer une fonction **syracuse** prenant un entier $n$ en entrée, générant cette suite de Syracuse et s'arrêtant lorsque l'on atteint 1. La fonction renverra en sortie la suite  des nombres obtenus. Indication : on pourra utiliser la fonction **cbind** pour concaténer la suite obtenue au fur et à mesure de l'algorithme.
+2. Grâce à une boucle, appliquer cette fonction à tous les entiers de 1 à 100 et stocker dans un vecteur les 100 longueurs des suites associées (on ne demande pas de stocker les 100 suites). A l'aide de la fonction **plot**, représenter sur un graphique les 100 longueurs.
+3. Refaire la même chose sans utiliser de boucle, à l'aide de la fonction **sapply**. Comparer les temps de calcul. Même question avec $n=1000$.
+4. Parmi les 100 suites créées, quelle est la longueur maximale atteinte ? Pour quel entier est-elle atteinte ? Pour celui-ci, représenter la suite de Syracuse associée.
+
+
+## 3.4. Etude d'un jeu de données
+
+Dans le cadre d'une étude de la population, un hôpital s'est intéressé à la propension à ronfler d'hommes et de femmes. Le fichier snore.txt contient un échantillon de 100 patients, les variables considérées sont :
+
+* age : en années ;
+* poids : en kg ;
+* taille : en cm ;
+* alcool : nombre de verres bus par jour (en équivalent verre de vin rouge) ;
+* sexe : sexe de la personne (F=femme, H=homme) ;
+* ronfle : diagnostic de ronflement (O=ronfle, N=ne ronfle pas) ;
+* tabac : comportement au niveau du tabac (O=fumeur, N=non fumeur).
+
+La première étape consiste à importer le jeu de données sous R. Pour ce faire, il faut au préalable vérifier que le fichier est enregistré dans le répertoire où R travaille. L'importation s'effectue alors à partir de la fonction **read.table** :
+
+```{r eval=F}
+donnees <- read.table("snore.txt")
+```
+
+1. Extraire le premier individu du jeu de données. Que remarquez-vous ?
+2. A partir de l'aide de la fonction **read.table**, résoudre ce problème.
+3. Analyser les sorties de la commande :
+
+```{r eval=F}
+summary(donnees)
+```
+
+4. Créer deux tableaux de données issus du tableau original : un tableau nommé **ronfleur** qui contient uniquement les individus qui ronflent et un autre nommé **nonronfleur** qui contient les individus ne ronflant pas (on pourra utiliser la fonction **split**).
+5. Résumer les deux tableaux de données. Comparer ces indicateurs, interpréter.
+6. Quelle est la proportion d'hommes parmi les personnes qui ronflent ? Quelle est la proportion de ronfleurs parmi les hommes ?
+
+## 3.5 Pour aller plus loin : Chaîne de Markov
+
+On définit pour tout $n \in \mathbb{N}$ une chaîne de Markov $X_n$ homogène sur $E=\{1,2,3\}$, i.e. pour tout couple $(i,j) \in E^2$, 
+$$P(X_{n+1}=j \vert X_n=i)=P_{i,j},$$
+avec $P$ définie par 
+
+$$P=\begin{pmatrix} 1/3 & 1/3& 1/3 \\
+                    0 & 1/2 & 1/2 \\
+                    1/2 & 1/2 & 0
+                    \end{pmatrix}.$$
+La matrice $P$ est appelée matrice de transition. Chaque entrée $P_{i,j}$ représente la probabilité de passer d'un état $i$ à un état $j$ (on remarque d'ailleurs que la somme de chaque ligne vaut 1). 
+On initialise la chaîne à l'état 1, i.e $X_0=1$.
+
+1. Coder une fonction qui permet de simuler une trajectoire de taille 50 (i.e une fonction qui renvoie les états $X_1, \dots, X_{50}$).
+2. Simuler 3 trajectoires et les représenter sur le même graphique.
+3. Simuler une trajectoire de taille $1000$ et représenter sur un même graphique les fonctions
+	$$ 	T\mapsto \frac{1}{T} \sum_{n=1}^T  \mathbb{1}_{\{X_n=1\}} \ , \quad 
+	T\mapsto \frac{1}{T} \sum_{n=1}^T \mathbb{1}_{\{X_n=2\}} \quad \mbox{et} \quad 
+	T\mapsto \frac{1}{T} \sum_{n=1}^T\mathbb{1}_{\{X_n=3\}} $$
+pour $T=1,\dots,1000$. Que remarque-t-on ? Ceci est une illustration d'un résultat fondamental sur les chaînes de Markov, qu'on appelle le théorème ergodique.
+
+
+
