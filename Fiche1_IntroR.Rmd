@@ -528,11 +528,12 @@ $$P=\begin{pmatrix} 1/3 & 1/3& 1/3 \\
                     0 & 1/2 & 1/2 \\
                     1/2 & 1/2 & 0
                     \end{pmatrix}.$$
+                    
 La matrice $P$ est appelée matrice de transition. Chaque entrée $P_{i,j}$ représente la probabilité de passer d'un état $i$ à un état $j$ (on remarque d'ailleurs que la somme de chaque ligne vaut 1). 
 On initialise la chaîne à l'état 1, i.e $X_0=1$.
 
 1. Coder une fonction qui permet de simuler une trajectoire de taille 50 (i.e une fonction qui renvoie les états $X_1, \dots, X_{50}$).
-2. Simuler 3 trajectoires et les représenter sur le même graphique.
+2. Simuler une trajectoire et la représenter.
 3. Simuler une trajectoire de taille $1000$ et représenter sur un même graphique les fonctions
 	$$ 	T\mapsto \frac{1}{T} \sum_{n=1}^T  \mathbb{1}_{\{X_n=1\}} \ , \quad 
 	T\mapsto \frac{1}{T} \sum_{n=1}^T \mathbb{1}_{\{X_n=2\}} \quad \mbox{et} \quad 
