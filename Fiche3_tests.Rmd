@@ -348,13 +348,13 @@ y_{ij} = \mu + \alpha_i+\varepsilon_{ij},
 \quad \hbox{modèle sous }H_1$$
 
 ```{r}
-x1=rnorm(10,0,1)
-x2=rnorm(10,0,1)
- y=x1+x2+rnorm(10,0,1)
-res=lm(y~x1+x2)
+mu=rnorm(10,0,1)
+alpha=c(0,0,0,0,1,0,0,1,1,1)
+y=mu+alpha+rnorm(10,0,0.1)
+res=lm(y~alpha)
 anova(res)
 ```
-La commande **anova(res)** renvoie notamment les p-valeurs associées aux tests de Fisher.  
+La commande **anova(res)** renvoie notamment la p-valeurs associée au test de Fisher.  
 
 # Exercices
 
