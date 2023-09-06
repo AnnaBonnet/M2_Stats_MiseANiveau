@@ -290,7 +290,7 @@ de la variable **ronfle** à l'aide d'un boxplot.
 
 ## 4.4 Harry Potter
 
-1. Charger le jeu de données Harry.Rdata qui contient le nombre d'occurrences du nom "Harry" dans chaque tome de la saga Harry Potter puis afficher les 10 premières lignes du jeu de données.
+1. En utilisant la fonction **load** =, charger le jeu de données Harry.Rdata qui contient le nombre d'occurrences du nom "Harry" dans chaque tome de la saga Harry Potter puis afficher les 10 premières lignes du jeu de données.
 2. Représenter une courbe du nombre d'occurrence en fonction du nombre de chapitre, avec  une couleur différente pour chaque livre. 
 3. Utiliser la palette de couleurs "Dark2" et changer le nom des axes.
 4. Représenter la même chose mais avec un graphique par livre.
