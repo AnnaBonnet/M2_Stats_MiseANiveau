@@ -1,0 +1,298 @@
+---
+title: 'Fiche 2 : Représentation des données avec ggplot2'
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+date: "Septembre 2022"
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+# Introduction
+
+Le package **ggplot2** est un outil de plus en plus utilisé pour représenter des données. Les graphes proposés par **ggplot2** sont généralement plus élaborés et mieux finalisés que les graphes effectués avec les fonctions classiques de R. Ce package permet également d'obtenir des représentations graphiques par sous-groupes d'individus avec très peu de code. Les légendes sont le plus souvent gérées automatiquement. La syntaxe de **ggplot2** est spécifique et totalement différente de celle des graphiques conventionnels de R. Cette fiche n'en présente qu'une simple introduction.
+
+N'hésitez pas consulter l'aide-mémoire de ggplot2 ou le site <a href="http://www.cookbook-r.com">cookbook-r</a>.
+
+# 1. Premiers graphes avec **ggplot2**
+
+Il faut bien entendu commencer par installer le package **ggplot2**. On considère le jeu de données **diamonds** qui contient le prix ainsi que certaines caractéristiques de 54000 diamants. Afin d'avoir des représentations graphiques moins lourdes, on se restreint à un sous-échantillon de taille 5000 :
+```{r eval=T, warning = FALSE}
+library(ggplot2)
+diamants <- diamonds[sample(nrow(diamonds), 5000), ] 
+```
+
+L'approche **ggplot2** consiste à séparer les instructions qui vont permettre d'obtenir la représentation graphique souhaitée.
+
+
+# 2. Exemple d'utilisation de ggplot
+
+## 2.1 Le jeu de données 
+
+On commence par spécifier le jeu de données sur lequel on va travailler.
+
+```{r eval=T}
+ggplot(diamants) 
+```
+
+Pour l'instant, le graphe est vide.
+
+## 2.2 Les variables
+
+On précise ensuite les variables qu'on va représenter (chaque ajout se fait avec le signe "+")
+
+```{r eval=T}
+ggplot(diamants) + aes(x = carat, y=price)
+```
+
+Le graphe est toujours vide, mais on a défini nos axes !
+
+## 2.3 Le type de graphe
+
+Il reste à indiquer quel type de représentation on veut (courbe, point, histogramme, etc).
+```{r eval=T}
+ggplot(data = diamonds) + # The data we want to plot
+aes(x = carat, y = price) + # What we will see on x and y
+geom_point()
+```
+
+Si on veut représenter plusieurs types de graphes sur la même figure, par exemple si on veut tracer le prix moyen, il faut indiquer pour chaque type de graphe les aes correspondant :
+
+
+```{r eval=T}
+ggplot(data = diamonds) + 
+aes(x = carat) + 
+geom_point(aes(y=price)) +
+  geom_line(aes(y=mean(price)))
+```
+
+## 2.4 Les ajustements
+
+On a notre graphe de base, on peut faire toutes modifications souhaitées, par exemple :
+
+### Changer la couleur 
+
+```{r eval=T}
+ggplot(data = diamants) + 
+aes(x = carat, y = price) + 
+geom_point(color="red")
+```
+
+### Changer la couleur en fonction d'une autre variable 
+```{r eval=T}
+ggplot(data = diamants) + 
+aes(x = carat, y = price,color=cut) + 
+geom_point()
+```
+
+### Rajouter un titre, modifier les noms des axes
+```{r eval=T}
+ggplot(data = diamants) + 
+aes(x = carat, y = price,color=cut) + 
+  geom_point() + 
+labs(title="Quelle belle figure !",y="Prix (en dollars)")
+```
+
+### Séparer en plusieurs graphes
+
+La fonction **facet_grid** permet de faire un graphe pour chaque modalité d'une variable :
+```{r eval=T}
+ggplot(data = diamants) + 
+aes(x = carat, y = price) + facet_grid(.~cut)+
+  geom_point() + 
+labs(y="Prix (en dollars)")
+```
+
+Remarque : Si on remplace **facet_grid(.~cut)** par **facet_grid(cut~.)**, les figures seront les unes sous les autres. 
+
+
+
+
+
+
+
+
+
+# 3. Résumé sur la grammaire ggplot
+Comme nous venons de le voir, une représentation graphique **ggplot** se construit à partir de différentes couches composées d'éléments indépendants. Ces éléments constituent la grammaire de la syntaxe. Les principaux éléments de la grammaire sont :
+
+* **Data (ggplot)** : le jeu de données qui contient les variables que l'on veut représenter ;
+* **Aesthetics (aes)** : specifications des variables à représenter sur l'axe des x (x) et l'axe des y (y), on inclut également la couleur des lignes (colour), la couleur du remplissage des polygones (fill) le type de lignes (linetype) etc ;
+* **Geometrics (geom_...)** : spécification du type de représentation graphique souhaitée (geom_point pour dessiner des points, geom_line pour des lignes, geom_bar pour des barres etc) ;
+* **Statistics (stat_...)** : spécification d'éventuelles transformations des données pour la représentation souhaitée ;
+* **Scales (scale_...)** : permet de contrôler le lien entre les données et les aesthetics (modification de couleurs, gestion des axes...).
+
+Nous présentons dans la suite quelques notions élémentaires sur ces différents éléments.
+
+##  Geometrics
+
+ Le tableau ci-dessous donne quelques exemples de fonctions (accompagnés des aesthetics) permettant de faire les représentations graphiques classiques.
+
+Geom   | Description| Aesthetics 
+-------|------------|-----------
+geom_point()| Nuage de points | x, y, shape, fill 
+geom_line()|  Ligne (ordonnée selon x) | x, y, linetype
+geom_abline()|  Droite | slope, intercept 
+geom_path() | Ligne (ordre original) | x, y, linetype 
+geom_text() | Texte | x, y, label, hjust, vjust 
+geom_rect() | Rectangle | xmin, xmax, ymin, ymax, fill, linetype
+geom_polygon() | Polygone | x, y, fill, linetype
+geom_segment() | Segment | x, y, fill, linetype 
+geom_bar() | Diagramme en barres | x, fill, linetype, weight 
+geom_histogram() | Histogramme | x, fill, linetype, weight 
+geom_boxplot() | Boxplots | x, y, fill, weight 
+geom_density() | Densité | x, y, fill, linetype 
+geom_contour() | Lignes de contour | x, y, fill, linetype 
+geom_smooth() | Lissage | x, y, fill, linetype 
+Tous | | color, size, group
+
+Chaque **geom** admet également des arguments particuliers permettant de modifier le graphe (couleur, taille de points, épaisseur de traits, etc.). Si on souhaite par exemple représenter un nuage de points rouges, c'est dans la fonction **geom_point**, non dans la fonction **aes**, qu'il faudra mettre l'argument **color**. De même, pour faire un diagramme en barres bleu, on utilisera **fill="blue"** dans **geom_bar** :
+```{r eval=T}
+ggplot(diamants) + aes(x = carat, y = price) + geom_point(color = "red")
+ggplot(diamants) + aes(x = cut) + geom_bar(fill = "blue")
+```
+
+## Statistics 
+
+Les **statistics** représentent une alternative aux **geom** pour construire une couche et tracer une courbe. 
+Elles peuvent être très utiles notamment pour le tracé de fonctions :
+
+```{r}
+
+p1=ggplot(data.frame(x=seq(0,1,0.01)),aes(x=x))
+f=function(x){x^2+x-1}
+p2=p1+stat_function(fun=f)
+p2
+```
+
+Les fonctions basiques sont déjà implémentées :
+
+```{r}
+
+p2+stat_function(fun=exp,col="blue")
+```
+
+##  Scales
+
+Les **scales** contiennent tous les paramètres qui permettent de faire le lien entre les données (data) et les aesthetics. Ils définissent ce qui est vu par l'oeil : couleurs, axes, tailles, etc. On les modifie le plus souvent pour affiner le graphe : modifier les palettes de couleur, gérer les axes, les tailles des points... Les fonctions scales sont nommées selon le même schéma :
+
+* elles commencent par **scale_** ;
+* suivi du nom de l'aesthetics que l'on souhaite modifier (**color_**, **fill_**, **x_**,...) ;
+* et se terminent par le nom du scale : manual, identity, ...
+
+On pourra par exemple modifier la couleur des points du graphe vu précédemment avec la commande
+```{r eval=T}
+ggplot(diamants) + aes(x = carat, y = price, color = cut) + geom_point() +
+  scale_color_manual(
+  values = c(
+  "Fair" = "black",
+  "Good" = "yellow",
+  "Very Good" = "blue",
+  "Premium" = "red",
+  "Ideal" = "green"
+  )
+  )
+```
+
+
+Le tableau suivant présente les principaux types de scales.
+
+
+aes | Discrètes | Continues 
+----|-----------|----------
+Couleur (color et fill) | brewer | gradient 
+  -  | grey | gradient2 
+  -  | hue | gradientn 
+ - | identity | 
+ - | manual |
+Position (x et y) | discrete | continous 
+- | | date 
+Forme | shape | 
+- | identity | 
+- | manual | 
+Taille  | identity | size 
+- | manual | 
+
+
+Voici quelques exemples concrets d'utilisation des scales :
+
+*  Couleurs d'un diagramme en barre : on construit le diagramme en barre de la variable **cut** en utilisant une couleur différente pour chaque barre :
+```{r eval=T}
+p1 <- ggplot(diamants) + aes(x = cut) + geom_bar(aes(fill = cut))
+p1
+```
+
+On change la couleur des barres en utilisant la palette **Purples** :
+```{r eval=T}
+p1 + scale_fill_brewer(palette = "Purples")
+```
+
+*  Dégradé de couleur pour un nuage de points : on s'intéresse au nuage de points **carat$\times$price** avec une échelle de couleur définie par la variable continue **depth** :
+```{r eval=T}
+p2 <- ggplot(diamants) + aes(x = carat, y = price) + geom_point(aes(color = depth))
+p2
+```
+
+On modifie le dégradé de couleur en proposant un nouveau dégradé allant du jaune au rouge à l'aide de scale_color_gradient :
+```{r eval=T}
+p2 + scale_color_gradient(low = "red", high = "yellow")
+```
+
+*  Gestion des axes et de la légende : on peut modifier la graduation de l'axe des abcisses, le nom de l'axe des ordonnées et celui de la variable de la légende du graphe **p2** avec
+```{r eval=T}
+p2 + scale_x_continuous(breaks = seq(0.5, 3, by = 0.5)) + scale_y_continuous(name = "prix") + scale_color_gradient("Profondeur")
+```
+
+```{r eval=F}
+p2 + scale_x_continuous(breaks = seq(0.5, 3, by = 0.5)) + scale_y_continuous(name = "prix") + scale_color_gradient("Profondeur", low = "red", high = "yellow")
+```
+
+
+# 4. Exercices
+
+## 4.1 Jeu de données **ronfle**
+Reprenons le jeu de données <a href="https://drive.google.com/file/d/1VL-CbFzkM5PRBxOZlndnCtQLPrvw3xn0/view?usp=sharing">snore.txt</a> de la fiche précédente.
+
+1. Représenter la variable **age** sous forme d'histogramme.
+2. Ajouter un titre au graphique précédent
+3. Représenter l'histogramme des densités avec les classes [20;40], ]40;55], ]55,80].
+4. Représenter la variable **age** à l'aide d'un boxplot. 
+5. Le package **gridExtra** permet de partitionne la fenêtre graphique. Représenter côte à côte l'histogramme et le boxplot précédents. 
+6. Représenter la variable **sexe** grâce à un diagramme en barres. 
+7. Représenter la variable **alcool** (transformée en variable qualitative via la fonction  **as.factor**). 
+9. Représenter le poids en fonction de la taille.
+9. Un boxplot peut être utilisé pour comparer une variable quantitative suivant les modalités d'une variable qualitative. Représenter ainsi les boîtes à moustaches de la variable **age** en fonction de la variable **ronfle**. Conclusion ?
+
+
+
+## 4.2 Graphes de fonctions 
+1. Tracer la fonction sinus en rouge sur
+l'intervalle $[0,4\pi]$. 
+2. Superposer sur ce graphe la fonction
+cosinus. 
+3. Ajouter sur le même graphe les droites
+d'équations $y=1$ et $y=-1$ en vert.  
+4. Ajouter
+la droite d'équation $y=x$ en tirets (option **linetype**) bleus.
+
+## 4.3. Comparaisons de variables 
+ On souhaite comparer la
+distribution des variables **taille** et **poids** suivant les modalités de la
+variable **ronfle**.
+
+1. Comparer la distribution de la variable **taille** suivant les modalités
+de la variable **ronfle** à l'aide d'un boxplot. 
+2. Même question pour la variable **poids**.
+3. Représenter les figures des questions précédentes sur une même fenêtre graphique. 
+
+## 4.4 Harry Potter
+
+1. Charger le jeu de données Harry.Rdata qui contient le nombre d'occurrences du nom "Harry" dans chaque tome de la saga Harry Potter puis afficher les 10 premières lignes du jeu de données.
+2. Représenter une courbe du nombre d'occurrence en fonction du nombre de chapitre, avec  une couleur différente pour chaque livre. 
+3. Utiliser la palette de couleurs "Dark2" et changer le nom des axes.
+4. Représenter la même chose mais avec un graphique par livre.
+5. Représenter avec des boxplots le nombre d'occurrences pour chaque livre. Rajouter un point rouge par boxplot qui correspond à la moyenne du nombre total d'occurrences.
+6. Changer le nom des livres par le numéro du tome et le nom de l'axe par "tome".
