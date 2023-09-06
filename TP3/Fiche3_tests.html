@@ -1667,13 +1667,13 @@ t.test(x,mu=0)</code></pre>
 ##  One Sample t-test
 ## 
 ## data:  x
-## t = 0.71685, df = 9, p-value = 0.4916
+## t = 0.17181, df = 9, p-value = 0.8674
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  -0.6905725  1.3312735
+##  -0.7069606  0.8231769
 ## sample estimates:
-## mean of x 
-## 0.3203505</code></pre>
+##  mean of x 
+## 0.05810813</code></pre>
 <p>R renvoie : la valeur de la statistique de test calculée sur
 l’échantillon, le nombre de degrés de liberté de la loi de Student et la
 p-valeur. Ici p &gt;&gt; 5%, ce qui est rassurant car on a simulé un
@@ -1688,25 +1688,25 @@ que la valeur de <span class="math inline">\(\bar{x}\)</span>.</p>
 ##  One Sample t-test
 ## 
 ## data:  x
-## t = 0.71685, df = 9, p-value = 0.7542
+## t = 0.17181, df = 9, p-value = 0.5663
 ## alternative hypothesis: true mean is less than 0
 ## 95 percent confidence interval:
-##     -Inf 1.13954
+##       -Inf 0.6780728
 ## sample estimates:
-## mean of x 
-## 0.3203505</code></pre>
+##  mean of x 
+## 0.05810813</code></pre>
 <pre class="r"><code>t.test(x,mu=0,alternative=&quot;greater&quot;)</code></pre>
 <pre><code>## 
 ##  One Sample t-test
 ## 
 ## data:  x
-## t = 0.71685, df = 9, p-value = 0.2458
+## t = 0.17181, df = 9, p-value = 0.4337
 ## alternative hypothesis: true mean is greater than 0
 ## 95 percent confidence interval:
-##  -0.4988393        Inf
+##  -0.5618565        Inf
 ## sample estimates:
-## mean of x 
-## 0.3203505</code></pre>
+##  mean of x 
+## 0.05810813</code></pre>
 <p>Ici on a simulé un échantillon <span class="math inline">\(x\)</span>
 gaussien mais comment savoir si on peut utiliser ce test sur des données
 non simulées ?</p>
@@ -1742,13 +1742,13 @@ t.test(x,y)</code></pre>
 ##  Welch Two Sample t-test
 ## 
 ## data:  x and y
-## t = -0.66177, df = 10.879, p-value = 0.5219
+## t = -1.5849, df = 11.401, p-value = 0.1403
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -2.292644  1.233792
+##  -2.6129764  0.4197765
 ## sample estimates:
 ##  mean of x  mean of y 
-## -0.1537987  0.3756274</code></pre>
+## -0.5827879  0.5138120</code></pre>
 <p>Encore une fois, par défaut R va considérer que <span class="math inline">\(H_1\)</span> est <span class="math inline">\(\mu_1
 \ne \mu_2\)</span>. Sinon, on va préciser l’alternative (attention au
 sens ! vérifier l’aider pour savoir quelle convention est choisie par
@@ -1760,13 +1760,13 @@ t.test(x,y,alternative = &quot;greater&quot;)</code></pre>
 ##  Welch Two Sample t-test
 ## 
 ## data:  x and y
-## t = -1.5844, df = 16.192, p-value = 0.9338
+## t = -0.59466, df = 17.404, p-value = 0.7201
 ## alternative hypothesis: true difference in means is greater than 0
 ## 95 percent confidence interval:
-##  -1.679704       Inf
+##  -1.036138       Inf
 ## sample estimates:
 ## mean of x mean of y 
-## 0.0367595 0.8361850</code></pre>
+## 0.0623419 0.3265629</code></pre>
 <p>Si <span class="math inline">\(X\)</span> et <span class="math inline">\(Y\)</span> ne sont pas indépendants, par exemple,
 lorsqu’on fait des mesures sur les mêmes individus. C’est le contexte du
 plan d’expérience qui nous permet de déterminer si les échantillons sont
@@ -1776,13 +1776,13 @@ indépendants ou non.</p>
 ##  Paired t-test
 ## 
 ## data:  x and y
-## t = -1.8668, df = 9, p-value = 0.09478
+## t = -0.58853, df = 9, p-value = 0.5706
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -1.7681511  0.1693001
+##  -1.2798197  0.7513776
 ## sample estimates:
 ## mean of the differences 
-##              -0.7994255</code></pre>
+##               -0.264221</code></pre>
 <p>En fait faire un test sur la moyenne de deux échantillons appariés (=
 non indépendants) revient à faire un test sur la différence <span class="math inline">\(D_i=X_i-Y_i\)</span> et comparer sa moyenne à 0.
 On peut le vérifier :</p>
@@ -1791,13 +1791,13 @@ On peut le vérifier :</p>
 ##  One Sample t-test
 ## 
 ## data:  x - y
-## t = -1.8668, df = 9, p-value = 0.09478
+## t = -0.58853, df = 9, p-value = 0.5706
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  -1.7681511  0.1693001
+##  -1.2798197  0.7513776
 ## sample estimates:
-##  mean of x 
-## -0.7994255</code></pre>
+## mean of x 
+## -0.264221</code></pre>
 <p>Comme pour un seul échantillon, ces tests sont valables uniquement
 lorsque les échantillons sont gaussiens ou de grande taille (<span class="math inline">\(n_1,n_2 \geq 30\)</span>). (Remarque : si les
 échantillons sont appariés, il suffit que la différence <span class="math inline">\(D\)</span> suive une loi gaussienne mais pas
@@ -1824,21 +1824,21 @@ cas contraire, les tests sont un peu modifiés.</p>
 ##  Wilcoxon signed rank exact test
 ## 
 ## data:  x
-## V = 28, p-value = 1
+## V = 35, p-value = 0.4922
 ## alternative hypothesis: true location is not equal to 0</code></pre>
 <pre class="r"><code>wilcox.test(x,y)</code></pre>
 <pre><code>## 
 ##  Wilcoxon rank sum exact test
 ## 
 ## data:  x and y
-## W = 31, p-value = 0.1655
+## W = 41, p-value = 0.5288
 ## alternative hypothesis: true location shift is not equal to 0</code></pre>
 <pre class="r"><code>wilcox.test(x,y,paired=TRUE)</code></pre>
 <pre><code>## 
 ##  Wilcoxon signed rank exact test
 ## 
 ## data:  x and y
-## V = 11, p-value = 0.1055
+## V = 25, p-value = 0.8457
 ## alternative hypothesis: true location shift is not equal to 0</code></pre>
 </div>
 </div>
@@ -1858,13 +1858,13 @@ binom.test(x2,10,0.2)</code></pre>
 ##  Exact binomial test
 ## 
 ## data:  x2 and 10
-## number of successes = 1, number of trials = 10, p-value = 0.698
+## number of successes = 0, number of trials = 10, p-value = 0.2282
 ## alternative hypothesis: true probability of success is not equal to 0.2
 ## 95 percent confidence interval:
-##  0.002528579 0.445016117
+##  0.0000000 0.3084971
 ## sample estimates:
 ## probability of success 
-##                    0.1</code></pre>
+##                      0</code></pre>
 <p>Dans le cas d’un échantillon, on peut également utiliser
 l’approximation donnée par le TCL :</p>
 <p><span class="math display">\[T=\frac{\bar{X}-\theta_0}{\sqrt{\frac{\theta_0
@@ -1877,13 +1877,13 @@ prop.test(x2,100,0.2)</code></pre>
 ##  1-sample proportions test with continuity correction
 ## 
 ## data:  x2 out of 100, null probability 0.2
-## X-squared = 9.7656, df = 1, p-value = 0.001778
+## X-squared = 1.2656, df = 1, p-value = 0.2606
 ## alternative hypothesis: true p is not equal to 0.2
 ## 95 percent confidence interval:
-##  0.03101985 0.14376573
+##  0.0891491 0.2385308
 ## sample estimates:
 ##    p 
-## 0.07</code></pre>
+## 0.15</code></pre>
 </div>
 <div id="tests-dajustement" class="section level1">
 <h1>Tests d’ajustement</h1>
@@ -1960,7 +1960,7 @@ ks.test(x,&quot;punif&quot;)</code></pre>
 ##  One-sample Kolmogorov-Smirnov test
 ## 
 ## data:  x
-## D = 0.094992, p-value = 0.9856
+## D = 0.15964, p-value = 0.6312
 ## alternative hypothesis: two-sided</code></pre>
 </div>
 <div id="ajustement-à-une-loi-normale" class="section level2">
@@ -1976,7 +1976,7 @@ shapiro.test(x)</code></pre>
 ##  Shapiro-Wilk normality test
 ## 
 ## data:  x
-## W = 0.87613, p-value = 0.01508</code></pre>
+## W = 0.74008, p-value = 0.0001253</code></pre>
 <p>Une très faible p-valeur nous conduit à rejeter <span class="math inline">\(H_0\)</span> : il est très probable que les
 données ne sont pas normalement distribuées. On ne pourra donc pas
 appliquer un test de Student sur cet échantillon et il sera préférable
@@ -2075,19 +2075,19 @@ résultats :</p>
 ## lm(formula = y ~ x)
 ## 
 ## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.40050 -0.04584  0.00239  0.05070  0.39414 
+##       Min        1Q    Median        3Q       Max 
+## -0.225684 -0.133011 -0.007298  0.141472  0.297933 
 ## 
 ## Coefficients:
 ##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept) -0.10725    0.07756  -1.383    0.204    
-## x            0.96291    0.06372  15.112 3.64e-07 ***
+## (Intercept) 0.001724   0.059158   0.029    0.977    
+## x           0.965745   0.046657  20.699 3.11e-08 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.2207 on 8 degrees of freedom
-## Multiple R-squared:  0.9662, Adjusted R-squared:  0.9619 
-## F-statistic: 228.4 on 1 and 8 DF,  p-value: 3.638e-07</code></pre>
+## Residual standard error: 0.1867 on 8 degrees of freedom
+## Multiple R-squared:  0.9817, Adjusted R-squared:  0.9794 
+## F-statistic: 428.4 on 1 and 8 DF,  p-value: 3.11e-08</code></pre>
 <ul>
 <li><p>Les estimations de a et b, avec les erreurs standards ainsi que
 les résultats du test de Student (statistique observée et p-valeur).
@@ -2155,20 +2155,20 @@ summary(res)</code></pre>
 ## lm(formula = y ~ x1 + x2)
 ## 
 ## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -1.5233 -0.5286 -0.2762  0.8086  1.6242 
+##      Min       1Q   Median       3Q      Max 
+## -2.19671 -1.08877  0.08502  0.94238  2.12060 
 ## 
 ## Coefficients:
 ##             Estimate Std. Error t value Pr(&gt;|t|)  
-## (Intercept)   0.1961     0.3828   0.512   0.6243  
-## x1            1.1289     0.3627   3.112   0.0170 *
-## x2            0.7361     0.2334   3.154   0.0161 *
+## (Intercept)   0.6098     0.9204   0.662   0.5289  
+## x1            1.9597     0.7315   2.679   0.0316 *
+## x2            0.6406     0.7599   0.843   0.4271  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 1.105 on 7 degrees of freedom
-## Multiple R-squared:  0.712,  Adjusted R-squared:  0.6298 
-## F-statistic: 8.655 on 2 and 7 DF,  p-value: 0.01281</code></pre>
+## Residual standard error: 1.579 on 7 degrees of freedom
+## Multiple R-squared:  0.7373, Adjusted R-squared:  0.6622 
+## F-statistic: 9.821 on 2 and 7 DF,  p-value: 0.009298</code></pre>
 </div>
 <div id="analyse-de-la-variance" class="section level2">
 <h2>Analyse de la variance</h2>
@@ -2210,11 +2210,11 @@ res=lm(y~alpha)
 anova(res)</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["int"],"align":["right"]},{"label":["Sum Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"2.811216","3":"2.8112161","4":"3.540851","5":"0.09665025","_rn_":"alpha"},{"1":"8","2":"6.351504","3":"0.7939381","4":"NA","5":"NA","_rn_":"Residuals"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Df"],"name":[1],"type":["int"],"align":["right"]},{"label":["Sum Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"1","2":"0.8808909","3":"0.8808909","4":"1.584016","5":"0.2436687","_rn_":"alpha"},{"1":"8","2":"4.4489001","3":"0.5561125","4":"NA","5":"NA","_rn_":"Residuals"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
-<p>La commande <strong>anova(res)</strong> renvoie notamment la
-p-valeurs associée au test de Fisher.</p>
+<p>La commande <strong>anova(res)</strong> renvoie notamment la p-valeur
+associée au test de Fisher.</p>
 </div>
 </div>
 <div id="exercices" class="section level1">

@@ -434,7 +434,7 @@ y=mu+alpha+rnorm(10,0,0.1)
 res=lm(y~alpha)
 anova(res)
 ```
-La commande **anova(res)** renvoie notamment la p-valeurs associée au test de Fisher.  
+La commande **anova(res)** renvoie notamment la p-valeur associée au test de Fisher.  
 
 # Exercices
 
