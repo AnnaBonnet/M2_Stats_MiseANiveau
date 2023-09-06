@@ -490,7 +490,7 @@ L'algorithme de Syracuse, ou algorithme $3x+1$, fonctionne comme suit : à parti
 
 ## 3.4. Etude d'un jeu de données
 
-Dans le cadre d'une étude de la population, un hôpital s'est intéressé à la propension à ronfler d'hommes et de femmes. Le fichier snore.txt contient un échantillon de 100 patients, les variables considérées sont :
+Dans le cadre d'une étude de la population, un hôpital s'est intéressé à la propension à ronfler d'hommes et de femmes. Le fichier snore.txt contient un échantillon de $100$ patients, les variables considérées sont :
 
 * age : en années ;
 * poids : en kg ;
