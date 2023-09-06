@@ -477,7 +477,7 @@ On étudie le nombre de tirages au hasard nécessaires pour retrouver un nombre 
 1. Choisir un entier entre 0 et $n=10$, le stocker sous le nom **myst**. Ensuite, créer une boucle qui, à chaque itération, tire un entier au hasard entre 0 et $n=10$ jusqu'à obtenir **myst** (on pourra utiliser la fonction **sample** dont on consultera l'aide). En sortie de boucle, le nombre de tirages effectués sera renvoyé.
 2. A partir de la question précédente, créer une fonction prenant en entrée les entiers $n$ et **myst**, et donnant en sortie le nombre de tirages nécessaires pour retrouver **myst**.
 3. Pour $n=10$ et le même **myst** qu'en première question, appliquer cette fonction $M=100$ fois et stocker le résultat dans un vecteur **res**. Donner la moyenne de **res** et son écart-type. Quels sont les résultats attendus théoriquement ?
-4. Si vous avez utilisé une boucle à la question précédente, la refaire en utilisant la fonction **apply**.
+4. Si vous avez utilisé une boucle à la question précédente, la refaire en utilisant la fonction **sapply**.
 
 ## 3.3. La conjecture de Syracuse
 L'algorithme de Syracuse, ou algorithme $3x+1$, fonctionne comme suit : à partir d'un entier naturel $n\in\mathbb{N}^\star$, si $n$ est pair on le divise par deux, si $n$ est impair on le multiplie par 3 et on ajoute 1. On répète ensuite l'opération avec le nombre obtenu, la conjecture étant qu'on finit par atteindre 1 et boucler indéfiniment : en effet, à partir de ce nombre, on tombe sur le cycle 1,4,2.

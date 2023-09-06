@@ -1,0 +1,590 @@
+---
+title: "Tests d'hypothèses et régression linéaire"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+Vous avez vu en Statistique mathématique comment effectuer des tests d'hypothèses, l'objectif de cette séance est de voir comment on peut les mettre en oeuvre en pratique avec R. Il existe de très nombreux tests et évidemment on n'en verra que quelques uns ici. L'idée est de se familiariser avec la démarche du test d'hypothèses en réfléchissant au choix du test le plus adapté à la problématique et en prenant soin de vérifier si les hypothèses d'utilisation sont vérifiées.
+
+# Test sur la moyenne
+
+## Un échantillon
+
+
+**Modèle** : $X_1, \ldots, X_n$ i.i.d $\sim
+\mathcal{N}(\mu, \sigma^2)$ avec $\mu$ et $\sigma^2$ inconnus.
+
+**Hypothèses** : 
+$H_0:\mu=\mu_0$ avec $\mu_0$ une valeur donnée 
+
+$H_1:\mu > \mu_0$ ou $\mu < \mu_0$ ou $\mu \neq \mu_0$
+
+**Statistique de test** : 
+  $$T=\frac{\bar{X}-\mu_0}{\frac{\hat{s}}{\sqrt{n}}} \underset{H_0}{\sim}\mbox{Student}(n-1)$$
+
+avec $\bar{X}=\frac{1}{n}\sum_{i=1}^{n} X_i$ et $\hat{s}^2=\frac{1}{n-1}\sum_{i=1}^{n} 
+(X_i-\bar{X})^2$ 
+
+
+```{r}
+x=rnorm(10,0,1)
+
+t.test(x,mu=0)
+
+```
+R renvoie : la valeur de la statistique de test calculée sur l'échantillon, le nombre de degrés de liberté de la loi de Student et la p-valeur.
+Ici p >> 5\%, ce qui est rassurant car on a simulé un échantillon gaussien de moyenne nulle ! On conserve donc $H_0$.
+R donne également un intervalle de confiance à 95\% pour $\mu_0$ ainsi que la valeur de $\bar{x}$.
+
+Par défaut, R considère que l'hypothèse alternative est $\mu_0 \neq 0$. Sinon, il faut lui préciser $H_1$ avec l'argument **alternative**
+
+```{r}
+t.test(x,mu=0,alternative="less")
+t.test(x,mu=0,alternative="greater")
+```
+
+Ici on a simulé un échantillon $x$ gaussien mais comment savoir si on peut utiliser ce test sur des données non simulées ?
+
+Si l'échantillon est de "grande taille" (souvent on considère en pratique que c'est le cas si $n \geq 30$), alors on considère l'approximation du TCL valable, i.e. 
+
+ $$T=\frac{\bar{X}-\mu_0}{\frac{\hat{s}}{\sqrt{n}}} \underset{H_0}{\simeq}  \mathcal{N}(0,1)$$ 
+ 
+ On peut alors effectuer un test de Student sans avoir plus d'information sur la loi des $X_i$.
+ 
+ Si l'échantillon est de petite taille : on peut effectuer un test de Shapiro-Wilk (cf plus loin) qui nous permet de savoir si on peut considérer l'échantillon gaussien ou non.
+ 
+ Enfin, si l'échantillon est de petite taille, on pourra considérer un test non paramétrique sur la variance (cf plus loin).
+ 
+## Deux échantillons
+
+\noindent \underline{Données gaussiennes} 
+
+**Modèle** :  $X_1, \ldots, X_{n_1}$ sont i.i.d de loi
+$\mathcal{N}(\mu_1,\sigma^2_1)$ et  $Y_1, \ldots, Y_{n_2}$ sont
+i.i.d de loi $\mathcal{N}(\mu_2,\sigma^2_2)$
+
+**Hypothèses** :
+$H_0 : \mu_1= \mu_2$ 
+ $H_1 : \mu_1 \ne \mu_2$ ou $\mu_1 < \mu_2$ ou $\mu_1 >\mu_2$
+
+
+Si $X$ et $Y$ sont indépendants :
+
+```{r}
+x=rnorm(10,0,2)
+y=rnorm(20,0.5,1)
+t.test(x,y)
+```
+
+Encore une fois, par défaut R va considérer que $H_1$ est $\mu_1 \ne \mu_2$. Sinon, on va préciser l'alternative (attention au sens ! vérifier l'aider pour savoir quelle convention est choisie par R).
+
+```{r}
+x=rnorm(10,0,1)
+y=rnorm(10,0.5,1)
+t.test(x,y,alternative = "greater")
+```
+
+Si $X$ et $Y$ ne sont pas indépendants, par exemple, lorsqu'on fait des mesures sur les mêmes individus. C'est le contexte du plan d'expérience qui nous permet de déterminer si les échantillons sont indépendants ou non.
+
+```{r}
+t.test(x,y,paired=TRUE)
+```
+
+En fait faire un test sur la moyenne de deux échantillons appariés (= non indépendants) revient à faire un test sur la différence $D_i=X_i-Y_i$ et comparer sa moyenne à 0. On peut le vérifier :
+
+```{r}
+t.test (x-y,mu=0)
+```
+
+Comme pour un seul échantillon, ces tests sont valables uniquement lorsque les échantillons sont gaussiens ou de grande taille ($n_1,n_2 \geq 30$). (Remarque : si les échantillons sont appariés, il suffit que la différence $D$ suive une loi gaussienne mais pas nécessairement $X$ et $Y$.)
+
+Dans le cas de petits échantillons gaussiens, on considérera plutôt un test non paramétrique décrit ci-dessous.
+
+## Cas de petits échantillons non gaussiens
+
+On pourra utiliser des tests de type Wilcoxon, qui reposent non pas  sur les valeurs mais sur les rangs des
+données.  L'idée des tests de rang est la suivante : si on rassemble les
+deux échantillons, et que l'on range les valeurs dans l'ordre,
+l'alternance des $X_i$ et des $Y_j$ devrait être assez régulière sous $H_0$.  On aura des doutes sur $H_0$ si les $Y_j$ sont plutôt plus grands
+que les $X_i$, ou plus petits, ou plus fréquents dans une certaine
+plage de valeurs. On va donc construire des tests basés sur les rangs
+ie sur  les numéros d'ordre des valeurs observées rangées par ordre
+croissant. Il n'y a donc pas besoin de supposer que les données suivent
+une loi particulière. 
+
+Remarque : Les tests de rangs supposent l'absence d'ex-aequo. Dans le cas
+contraire, les tests sont un peu modifiés.
+
+La syntaxe est similaire à celle des tests de Student :
+
+```{r}
+wilcox.test(x,mu=0)
+wilcox.test(x,y)
+wilcox.test(x,y,paired=TRUE)
+```
+
+
+
+
+
+
+
+# Test sur une proportion 
+
+
+**Modèle** : Soit un échantillon $X_1, \ldots, X_n$ i.i.d de loi de
+Bernoulli de paramètre  $\theta$ inconnu.  
+ 
+**Hypothèses** : $H_0:\theta=\theta_0$
+
+$H_1:\theta > \theta_0$ ou $\theta<\theta_0$ ou $\theta \neq \theta_0$
+
+```{r}
+library(purrr) ## contient la fonction rbernoulli
+x=rbernoulli(10,0.1)
+x2=length(which(x==TRUE))
+binom.test(x2,10,0.2)
+
+```
+Dans le cas d'un échantillon, on peut également utiliser l'approximation donnée par le TCL :
+
+$$T=\frac{\bar{X}-\theta_0}{\sqrt{\frac{\theta_0 (1-\theta_0)}{n}}}
+\underset{H_0}{\simeq} \mathcal{N}(0,1)$$ 
+
+
+```{r}
+x=rbernoulli(100,0.1)
+x2=length(which(x==TRUE))
+prop.test(x2,100,0.2)
+```
+
+
+# Tests d'ajustement
+
+On possède une réalisation d'une variable aléatoire $X$ de loi inconnue et on cherche à tester une hypothèse $H_0$ du type "$X$ suit la loi $\mathcal{L}$" contre $H_1$ : $X$ ne suit pas la loi $\mathcal{L}$.
+
+
+## Ajustement à une loi discrète
+
+Le test d'ajustement le plus utilisé est le test du $\chi^2$ (prononcer "khi deux") d'ajustement, basé sur la comparaison des effectifs attendus sous $H_0$ et les effectifs observés. 
+Par exemple, on souhaite comparer la répartition des groupes sanguins dans une population à des fréquences de référence : 40\% de 0, 43\% de A, 12\% de B et 5\% de AB. Dans cette population de 120 individus, on observe 41 0, 42 A, 25 B et 12 AB. Est-ce que cette répartition correspond à la fréquence de référence ?
+
+
+Soit la variable aléatoire X correspondant au groupe sanguin d'un
+individu de la population que l'on étudie. 
+C'est une variable aléatoire  discrète à $I=4$ modalités.
+Soit $\mathcal{L}$ la répartition du groupe sanguin dans le groupe de référence.
+
+Hypothèses $H_0$ : $X$ suit la loi $\mathcal{L}$
+
+$H_1$ $X$ ne suit pas la loi $\mathcal{L}$
+
+
+Soit  $N_i $ : les effectifs observés dans l'échantillon ( nombre
+d'individus ayant la modalité $a_i$  dans  l'échantillon)
+
+\hspace{0.7cm} $p_i$ : les probabilités théoriques connues et donc
+
+\hspace{0.7cm} $n p_i$ : les effectifs théoriques, attendus sous $H_0$.
+
+Statistique de test :
+$$Z_n=  \sum_{i=1}^I n \frac{ (\frac{N_i}{n} -p_i)^2}{p_i}=
+\sum_{i=1}^I \frac{(N_i - np_i)^2}{np_i} $$
+$Z_n$ mesure la distance entre les effectifs théoriques et les 
+effectifs observés. $Z_n$ est d'autant
+plus grand que la distance entre effectifs  théoriques et observés est
+grande.
+ 
+```{r}
+x=c(41,42,25,12)
+chisq.test(x,p=c(0.4,0.43,0.12,0.05))
+```
+ La p-valeur, très faible, nous conduit à rejeter $H_0$.
+ 
+ **Attention** Le test du $\chi^2$ peut être utilisé uniquement si les effectifs attendus sous $H_0$ sont suffisamment grands. Il faut en effet que tous les $n p_i \geq 5$. Si cette condition n'est pas respectée, on peut regrouper plusieurs modalités ensemble.
+ 
+ 
+ 
+## Ajustement à une loi continue
+
+Lorsque les variables
+sont continues, utilise très souvent le test de
+Kolmogorov-Smirnov.
+L'adéquation à une loi donnée porte sur les fonctions de répartition.
+On veut tester :
+
+$$H_0 : \forall x \in \mathbb{R}, \quad F(x) = F_0(x)  \quad\mbox{ contre }
+\quad H_1 : \exists x \in \mathbb{R}, F(x) \ne F_0(x)$$
+où $F_0$ est une fonction de répartition donnée (celle de la loi que
+vous pensez adaptée) et $F$ la "vraie" fonction de répartition des
+données (elle est inconnue !).
+
+Pour cela, on introduit la fonction de répartition empirique estimée à
+partir de l'échantillon $X_1, \ldots, X_n$. Elle est définie pour tout x
+réel, par : 
+$$ F_n(t) = \frac{1}{n} \mbox{card}\{k = 1,
+\ldots, n,  \hspace{0.2cm} x_k \le t\} \quad \in[0,1]$$
+Si les  données sont rangées par ordre croissant $x_{(1)}, \ldots,
+x_{(n)}$ alors $F_n(t)=i/n$ si
+$x_{(i-1)} \le t < x_{(i)}$. La fonction de répartition empirique est
+une fonction en escalier.  
+
+Rappel MAIN 3 : d'après le théorème de Glivenko-cantelli, la fonction
+de répartition empirique $F_n$ approxime bien la vraie"
+  fonction de répartition  $F$ lorsque $n$ tend vers l'infini.\\
+
+La statistique du test de Kolmogorov-Smirnov est $$KS=\max_{t \in \mathbb{R}}
+{|F_n(t)-F_0(t)|}$$ C'est le maximum des écarts entre la  fonction de
+répartition empirique et $F_0$.
+Il existe des tables de cette statistique sur lesquelles se baser pour
+conduire à rejeter ou non l'hypothèse $H_0$.
+```{r}
+x=runif(20)
+ks.test(x,"punif")
+
+```
+
+
+## Ajustement à une loi normale
+
+Dans le cas d'un ajustement à la loi normale, on peut utiliser le test de Kolmogorov-Smirnov mais également on utilise très souvent le test de Shapiro-Wilk qui est spécifique à la loi normale. Ce test est particulièrement utile avant d'effectuer un autre test (par exemple test de Student sur un petit échantillon).
+
+```{r}
+x=rbinom(20,10,0.1)
+shapiro.test(x)
+```
+Une très faible p-valeur nous conduit à rejeter $H_0$ : il est très probable que les données ne sont pas normalement distribuées. On ne pourra donc pas appliquer un test de Student sur cet échantillon et il sera préférable de se tourner par exemple vers un test non paramétrique de type Wilcoxon.
+
+# Test d'indépendance entre 2 variables qualitatives
+
+\noindent \textit{Exemple :}
+Afin d'étudier s'il existe une liaison entre le port de la
+ceinture de  
+sécurité et le degré de gravité des blessures, la Sécurité Routière a
+étudié un échantillon  de 10779 conducteurs ayant
+subi  un accident. Les résultats sont les suivants :
+
+```{r,echo=FALSE}
+M=matrix(c(1,4,25,1229,43,98,330,9049),ncol = 2)
+row.names(M)=c("fatales","graves","sérieuses","Pas ou peu de blessure")
+colnames(M)=c("ceinture","pas de ceinture")
+M
+```
+
+
+
+\noindent Question : le port de la ceinture a t-il  une influence
+significative 
+sur la nature des blessures? 
+
+
+\vspace{0.2cm}
+\noindent Soit $X$ : nature des blessures d'un conducteur ayant subi un
+accident ($k = 4$ modalités) et $Y$ : port de la ceinture d'un conducteur
+ayant subi un accident ($m = 2$ modalités). 
+
+On veut tester :
+
+$H_0$ : Le port de la ceinture n'a pas d'influence sur la nature des
+blessures
+
+$H_1$ : Le port de la ceinture a une influence sur la nature des blessures
+
+c'est-à-dire :
+
+$H_0$ : $X$ et $Y$ sont indépendantes
+
+$H_1$ : $X$ et $Y$ sont liées
+
+Idée : sous  $H_0$ on a $P(X = a_i \mbox{ et }  Y = b_j) =P(X = a_i)P(Y  = b_j) \quad \forall i, j$, en notant $a_i$ les modalités de la variable $X$ et $b_j$ les modalités de la variable $Y$. On définit :
+
+
+$N_{ij}$ :  nombre d'individus ayant les modalités $a_i$ et $b_j$  dans  l'échantillon
+
+$N_{i \bullet}$ : nombre d'individus ayant la modalité ou $a_i$ dans l'échantillon
+ 
+$N_{\bullet,j}$ : nombre  d'individus ayant la modalité $bj$ dans l'échantillon 
+
+Statistique de test : 
+
+$$Z_n=\sum_i \sum_j \frac{(N_{ij} - \frac{N_{i \bullet}
+    N_{\bullet j}} {n} )^2 }{ \frac{N_{i \bullet} N_{\bullet j}} {n} }$$
+Propriété : Sous $H_0$, la loi de $Z_n$ tend lorsque $n \rightarrow \infty$
+vers une loi $\chi^2 ((I-1)(J-1))$ où $I$ et $J$ sont  le nombre de
+modalités de $X$ et $Y$. 
+
+Ce test est asymptotique : en pratique, on considère que l'approximation est valide si  $\forall i,j \quad \frac{N_{i \bullet} N_{\bullet j}} {n} \ge 5$ (effectifs théoriques  suffisamment grands). Si un effectif théorique est inférieur, on
+regroupe 2  (ou plus) modalirés du tableau de contingence. 
+
+```{r}
+chisq.test(M)
+```
+
+
+Remarque : si on a un tableau $2 \times 2$ ce test du $\chi^2$
+d'indépendance est équivalent à comparer deux proportions observées.
+
+
+
+\noindent Lorqu'on ne peut pas utiliser le test du $\chi^2$ parce que les
+effectifs théoriques sont inférieurs à 5, une alternative consiste à
+utiliser le test exact proposé par Fisher (voir Littérature pour plus de détails)
+
+```{r}
+fisher.test(M)
+```
+
+
+# Régression linéaire
+
+## Régression simple
+La fonction R utilisée pour le modèle linéaire gaussien est la fonction **lm**. Elle prend comme argument
+le modèle que l’on souhaite  ́etudier.
+Dans le cas de la régression linéaire simple, le modèle est le suivant : $y_i = a + bx_i + \epsilon_i$, $i = 1, \dots, n$, ce
+qui en langage R s’ ́ecrit : y ∼ x.
+
+```{r}
+x=rnorm(10,0,1)
+y=x+rnorm(10,0,0.2)
+res=lm(y~x)
+names(res)
+```
+
+La commande **summary(res)** donne une série de résultats :
+
+```{r}
+summary(res)
+```
+
+- Les estimations de a et b, avec les erreurs standards ainsi que les résultats du test de Student (statistique observée et p-valeur). Pour rappel, on teste : $H_0 : a=0$ contre $H_1 : a \neq 0$ et $H_0 : b=0$ contre $H_1 : b \neq 0$.
+
+- l'estimation de l'erreur standard des résidus $$\hat\sigma=\sqrt{\frac{1}{n-1}\sum_{i=1}^n\hat\varepsilon_i^2}=\sqrt{\frac{1}{n-1}\sum_{i=1}^n(y_i-\hat y_i)^2}=\sqrt{\frac{1}{n-1}\sum_{i=1}^n(y_i-\hat\beta_0-\hat\beta_1 x_i)^2}.$$
+L'analyse des résidus est primordiale car elle permet de vérifier l'ajustement
+individuel du modèle (point aberrant) et l'ajustement global en vérifiant, par
+exemple, qu'il n'y a pas de structure. Pour accéder directement aux résidus, on tapera la commande **residuals(res)**
+
+- les résultats du test de Fisher : $H_0 : Y_i=a + \epsilon_i$ contre $H_1 : Y_i=a+b X_i + \epsilon_i$
+
+- le coefficient de détermination $R^2$ appelé  ”Multiple R-squared”. Il représente la part de variabilité
+des données qui est expliquée par le modèle. On a la décomposition suivante : SCT = SCR + SCM avec SCT = var(Y) la
+somme des carrés totale, SCM la somme des carrés expliquée par le modèle, et SCR la somme
+des carrés résiduelle. Par définition, $R^2 = 1 − \frac{SCR}{SCT}$.
+
+Attention à l'interprétation du $R^2$ : 
+
+- C'est un critère très facile à utiliser (plus $R^2$ est proche de 1, mieux on explique les données) mais il ne faut pas se fier uniquement à cette valeur. Notamment il est difficile de savoir si une faible valeur vient d'un modèle très bruité ou d'un mauvais ajustement. Il ne faut donc pas négliger les indicateurs visuels !
+
+- $R^2$ augmente lorsqu'on rajoute des variables explicatives, ce qui le rend difficilement utilisable pour la comparaison de modèles. La version "Adjusted R-squared" permet d'ajuster le $R^2$ en fonction du nombre de variables explicatives.
+
+## Régression multiple
+
+La régression linéaire multiple consiste à expliquer et/ou prédire une variable
+quantitative $Y$ à partir de $p$ variables quantitatives $X_1,\dots,X_p$. Le
+modèle de régression multiple est une généralisation du modèle de
+régression simple où $p=1$, c-à-d $Y$ est expliquée par une seule variable quantitative. Nous supposons donc que les $n$ données collectées suivent le modèle suivant:
+$$y_i=\beta_0+\beta_1 x_{i1}+\beta_2 x_{i2}+\cdots+\beta_{p}x_{ip}
++\varepsilon_i, \quad \quad i=1,\dots,n$$
+où les $x_{ij}$ sont des nombres connus mesurant les variables
+explicatives et que l'on range dans une matrice $X$ appelée matrice du
+plan d'expérience (la première colonne de $X$ étant le vecteur uniquement constitué de 1).  Les paramètres $\beta_j$ du modèle sont inconnus et à estimer. Le paramètre $\beta_0$ correspond à la constante du modèle. Les
+$\varepsilon_i$ sont des variables aléatoires inconnues et
+représentent les erreurs. Comme en régression linéaire simple, elles sont supposées i.i.d. suivant une loi gaussienne centrée.
+
+La commande pour effectuer une régression linéaire multiple sous R est similaire à la régression simple : 
+
+```{r}
+x1=rnorm(10,0,1)
+x2=rnorm(10,0,1)
+ y=x1+x2+rnorm(10,0,1)
+res=lm(y~x1+x2)
+summary(res)
+```
+
+## Analyse de la variance 
+
+L'analyse de la variance (ou ANOVA) à 1 facteur est une méthode
+statistique permettant de modéliser la relation entre une variable
+explicative qualitative à $I$ modalités (notée $A$) et une variable à
+expliquer quantitative (notée $Y$).  L'objectif principal de l'analyse
+de variance à 1 facteur est de comparer les moyennes empiriques de $Y$
+pour les $I$ modalités de $A$. 
+
+L'analyse de variance à 1 facteur revient donc à étudier l'effet d'un facteur $A$ sur la variable quantitative $Y$. Dans cet objectif, on peut construire le modèle suivant :
+$$y_{ij}=\mu+\alpha_i+\varepsilon_{ij} \hspace{1cm}(1)\hspace{1cm}i=1,...,I\hspace{1cm}j=1,...,n_i$$
+$n_i$ l'effectif de la modalité $i$, $y_{ij}$ la $j$-ème valeur observée pour la sous-population $i$ et $\varepsilon_{ij}$ le
+résidu du modèle. $\mu$ est l'effet moyen et $\alpha_i$ est l'effet propre à la modalité $i$. Un individu statistique est ainsi défini par le couple $(i,j)$. Ce modèle suppose les $\varepsilon_{ij}$ gaussiens indépendants centrés et de même variance.
+
+Il est alors possible de tester la significativité globale du facteur. Ce test est un test de Fisher. Il consiste à comparer la variabilité expliquée par le facteur $A$ à la variabilité
+résiduelle. Les hypothèses de ce test sont donc:
+$$H_0 : \quad \forall i \quad \alpha_i=0 \quad
+\mbox{contre}\quad H_1 : \exists i \quad \alpha_{i} \neq 0.$$
+Ces hypothèses reviennent à tester le sous-modèle contre le modèle complet :
+
+$$y_{ij} = \mu + \varepsilon_{ij}, \quad
+\hbox{modèle sous }H_0\\
+y_{ij} = \mu + \alpha_i+\varepsilon_{ij},
+\quad \hbox{modèle sous }H_1$$
+
+```{r}
+mu=rnorm(10,0,1)
+alpha=c(0,0,0,0,1,0,0,1,1,1)
+y=mu+alpha+rnorm(10,0,0.1)
+res=lm(y~alpha)
+anova(res)
+```
+La commande **anova(res)** renvoie notamment la p-valeurs associée au test de Fisher.  
+
+# Exercices
+
+## Exercice 1
+On souhaite tester si le générateur $runif$ de R simule bien des
+  réalisations de \vas de loi uniforme.
+
+
+1. Simuler un échantillon $x$ de $n=20$ \vas de loi uniforme sur
+  $[0,1]$.
+  
+2. Tracer la fonction de répartition empirique de l'échantillon $x$
+  (utiliser la fonction $ecdf$). Vérifier que vous comprenez bien
+  le graphe de la fonction de répartition empirique (fonction en
+  escalier, avec des marches de hauteur $1/n$ et de largeur $x_{(i+1)}-x_{(i)}$).
+
+3. Superposer la fonction de répartition de la loi uniforme sur
+  $[0,1]$. Commenter. Vous relancerez les questions 1 à 3 pour plusieurs
+  échantillons simulés $x$.
+
+4. Faire le test de Kolmogorov Smirnov pour tester si l'échantillon
+  $x$ est bien distribué selon la loi uniforme sur
+  $[0,1]$.
+
+<!-- ## Exercice 2 -->
+
+<!-- La société Mac Quick lance son nouveau produit FolBurger aux USA et en Europe. Elle effectue un -->
+<!-- sondage dans quatre villes (2 aux USA et 2 en Europe) en demandant une appréciation (Mauvais, Correct, -->
+<!-- Bon) à chaque consommateur sondé : -->
+
+<!-- ```{r,echo=FALSE} -->
+<!-- Burger=data.frame(Mauvais=c(29,74,182,114),Correct=c(214,278,417,277), Bon=c(87,208,123,87)) -->
+<!-- row.names(Burger)=c("San Francisco","New York","Paris","Rome") -->
+<!-- Burger -->
+<!-- ``` -->
+
+
+
+
+<!-- 1. L'appréciation du Folburger par le consommateur dépend-elle de la ville où il habite ? -->
+
+<!-- 2. Les habitants de New-York et de San Franscisco ont-ils une appréciation différente du Folburger ? -->
+
+<!-- 3.  Les habitants de Paris et de Rome ont-ils une appréciation différente du Folburger ? -->
+
+<!-- 4. Comment peut-on interpréter tous ces résultats ? -->
+
+## Exercice 2
+
+A chaque début de saison, les entraîneurs d'une grande équipe d'athlétisme équipent leurs coureurs en vêtements et chaussures. Le choix des chaussures est particulièrement important puisque des chaussures de mauvaise qualité peuvent altérer la performance des athlètes. Les entraîneurs hésitent entre garder le modèle qu'ils ont actuellement (modèle A) ou bien s'ils essayent un nouveau type de semelles (modèle B). Ils vont changer de modèle uniquement s'il s'avère plus performant que leur modèle actuel. Pour se décider , ils réalisent l'expérience est la suivante : 10 sportifs portent les semelles A, et 10 autres sportifs portent les semelles B pour le même type d'entraînement. On relève les résultats de l'usure des semelles dans chacun des groupes, c'est-à-dire le nombre de semaines avant de constater une dégradation de la semelle :
+
+```{r,echo=FALSE}
+Sportifs=data.frame(sportif=1:10,ModeleA=c(13.2,8.2,10.9,14.3,10.7,6.6,9.5,10.8,8.8,13.3),ModeleB=c(14,8.8,11.2,14.2,11.8,6.4,9.8,11.3,9.3,13.6))
+Sportifs
+```
+
+1. Comparer visuellement (en utilisant **ggplot**) l'usure des deux modèles.
+
+2. Ecrire le modèle, les hypothèses et réaliser le test avec R. Commenter.
+
+3. On suppose maintenant que les semelles A et B sont portées tour à tour par les mêmes sportifs. Quelle différence y a-t-il avec l'expérience précédente ? Ecrire le modèle, les hypothèses et faire le test avec les mêmes données que précédemment. Commenter. 
+
+## Exercice 3 
+
+On étudie l'effet d'un tranquillisant sur 9 patients. Voici des mesures
+traduisant l'anxiété avant et après le traitement. Le traitement est-il
+efficace ?
+
+```{r,echo=FALSE}
+mesures=data.frame(avant=c(1.83, 0.50 , 1.62 , 2.48 ,1.68, 1.88 ,1.55 ,1.2, 0.7),apres=c(0.878,0.647,0.598,2.05,1.06,1.29,1.06 ,3.14, 1.29))
+mesures
+```
+
+## Exercice 4 : régression linéaire simple
+
+Nous allons étudier le jeu de donnée ozone.txt. La pollution de l'air constitue une des préoccupations majeures
+de santé publique. De nombreuses études épidémiologiques ont permis de
+mettre en évidence l'influence sur la santé de certains composés
+chimiques comme le dioxyde de souffre (SO$_2$), le dioxyde d'azote
+(NO$_2$), l'ozone (O$_3$) ou des particules sous forme de poussières
+contenues dans l'air. Des associations de surveillance de la qualité de l'air existent sur tout
+le territoire français et mesurent la concentration des polluants. Elles
+enregistrent également les conditions météorologiques comme la température, la nébulosité, le vent, etc.
+
+
+Nous souhaitons analyser la relation entre la température à midi et le maximum journalier de la concentration en ozone (en $\mu$g/$\mathrm{m}^3$). Nous désignerons donc par :
+
+* $X$ la variable explicative : température à midi **T12** ;
+* $Y$ la variable à expliquer : maximum de la concentration en ozone **maxO3** (en $\mu$g/$\mathrm{m}^3$).
+
+Le modèle peut donc être écrit comme suit:
+$$Y=\beta_0+\beta_1 X+ \epsilon$$
+
+1. Importer les données et représenter le nuage de points. 
+2. Selon vous, un ajustement linéaire paraît-il justifié ?
+3. Il existe une solution explicite au problème de minimisation des moindres carrés, notée $(\hat\beta_0,\hat\beta_1)$. Sur R, la fonction **lm** permet de calculer la valeur de ces estimateurs. Après avoir consulté l'aide de cette fonction, donner les valeurs de $(\hat\beta_0,\hat\beta_1)$.
+4. A l'aide de la fonction **names**, lister toutes les sorties du modèle issu de la fonction **lm**.
+5. En déduire un moyen simple d'affecter les coefficients à un vecteur $\beta$ et de calculer la somme des carrés résiduelle pour le modèle que vous avez construit. Retrouver ainsi le terme **Residual Standard Error**.
+6. La droite $y=\hat\beta_0+\hat\beta_1x$ est appelée droite des moindres carrés (ou droite de régression). Représenter le nuage de points, la droite de régression et le centre de gravité du nuage de points sur une même fenêtre graphique. On pourra utiliser **geom_smooth** (en précisant "method=lm", cf l'aide) pour représenter la droite de régression.
+7. Sur un nouveau graphique, représenter le nuage de points des résidus. 
+8. Si le modèle est correct, quelle est la loi suivie par les résidus studentisés ? Sur un nouveau graphique, représenter le nuage de points de ceux-ci (on fera appel à la fonction **rstudent**). 
+9. Sur un nouveau graphique, superposer la densité théorique des résidus studentisés et un estimateur de la densité obtenu à partir de l'échantillon. On pourra utiliser **stat_function** pour représenter la densité théorique.
+10. La température prévue pour demain est égale à 25 degrés. Comment le modèle construit peut-il être utilisé pour prévoir la concentration en ozone ? Calculer la valeur prédite.
+11. Retrouver cette valeur à l'aide de la fonction **predict** : pour cela, on construira un data-frame **demain** avec la valeur 25 et pour nom de colonne **T12**. Donner l'intervalle de prédiction à 95\%.
+ 
+ 
+## Exercice 5 : Régression linéaire multiple 
+
+Nous reprenons les données ozone.txt. Nous souhaitons analyser la relation entre le maximum journalier de la concentration en ozone (en $\mu\mathrm{g}/\mathrm{m}^3$) et la température à différentes heures de la journée, la nébulosité à différentes heures de la journée, la projection du vent sur l'axe Est-Ouest à différentes heures de la journée et la  concentration maximale en ozone de la veille du jour considéré. Nous disposons de 112 données relevées durant l'été 2001.
+
+1. Créer un data-frame comportant uniquement les colonnes relatives à la variable à expliquer et aux variables explicatives mentionnées ci-dessus (c'est-à-dire quantitatives).
+2. Résumer ce data-frame pour vérifier que l'importation s'est bien passée.
+3. Estimer les paramètres grâce à la fonction **lm**, l'instruction **Y\string ~.** signifiant qu'on veut expliquer **Y** par toutes les autres variables du data-frame (ce qui est moins fastidieux que d'énumérer les 10 variables explicatives en question).
+4. Analyser les sorties du modèle construit. Comment interpréter les probabilités critiques obtenues dans le tableau des coefficients ? Comment retrouver la **F-statistic** ?
+
+5. Il est possible de faire un choix descendant (pas à pas) de variables à la main. On enlèverait la moins significative, soit **T9**, puis on recalculerait les estimations et ainsi de suite. Il existe en R un package qui traite
+du choix de variables: le package **leaps**. La fonction **regsubsets** retourne, pour différents critères (bic, $R^2$ ajusté, Cp de Mallows, etc.), le meilleur modèle (si **nbest=1**) à 1 variable explicative, à 2 variables explicatives, ..., à **nvmax** variables explicatives. Au vu du graphique obtenu par les instructions suivantes, choisir les variables à conserver dans le modèle.
+
+```{r eval=F}
+library(leaps)
+choix <- regsubsets(maxO3~.,data=ozone.m,nbest=1,nvmax=11)
+plot(choix,scale="bic")
+```
+
+6. Reprendre la régression multiple des questions précédentes avec ce modèle.   
+
+## Exercice 6 : Analyse de la variance
+
+Nous étudions de nouveau les données ozone.txt.
+
+1. Ne conserver que les variables **maxO3** et **vent**.
+
+2. A l'aide de **summary**, déterminer quel est le vent dominant durant la période considérée. 
+
+3. Avant une analyse de variance, il est d'usage de construire des boîtes à moustaches par modalité de la variable qualitative. Représenter ainsi la dispersion du **maxO3** en fonction de la direction du vent. Au vu de ce graphique, diriez-vous que la direction du vent a un effet sur l'ozone ?
+
+4. Pour analyser la significativité du facteur vent, on utilise à nouveau la fonction **lm** dans un premier temps, puis la fonction **anova**. 
+   + Ceci fait, que déduire de la probabilité critique trouvée ?
+   + Quelle est l'hypothèse faite sur les $\varepsilon_{ij}$ ?
+6. Pour analyser les résidus studentisés, comme en régression linéaire, on fait appel à la fonction **rstudent**. 
+   + Représenter ces résidus studentisés.
+   + Sur une même fenêtre graphique, mais sur quatre graphes distincts, représenter ces résidus en fonction des modalités de la variable **vent**.
+   + Représenter les résidus en fonction du vent par des boîtes à moustaches. 
+7. On revient aux résultats de la fonction **lm**.
+   + Quelle modalité du vent est prise en référence ? Pour quelle raison ?
+   + En déduire l'écriture du modèle sous la forme (1).
+   + Au vu des probabilités critiques, quelle orientation est comparable à celle prise en référence ?
+8. Commenter la ligne de commande suivante :
+```{r eval=F}
+modele2 = lm(maxO3~C(vent,base=2),data=ozone) 
+```
+9. A partir des coefficients de ce modèle, retrouver le précédent. 
+10. Retrouver le résultat du test de Fisher avec ce modèle.
