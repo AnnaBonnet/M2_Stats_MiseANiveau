@@ -55,7 +55,7 @@ Si l'échantillon est de "grande taille" (souvent on considère en pratique que 
  
  Si l'échantillon est de petite taille : on peut effectuer un test de Shapiro-Wilk (cf plus loin) qui nous permet de savoir si on peut considérer l'échantillon gaussien ou non.
  
- Enfin, si l'échantillon est de petite taille, on pourra considérer un test non paramétrique sur la variance (cf plus loin).
+ Enfin, si l'échantillon est de petite taille, on pourra considérer un test non paramétrique, que l'échantillon soit gaussien ou non (cf plus loin).
  
 ## Deux échantillons
 
@@ -100,7 +100,7 @@ t.test (x-y,mu=0)
 
 Comme pour un seul échantillon, ces tests sont valables uniquement lorsque les échantillons sont gaussiens ou de grande taille ($n_1,n_2 \geq 30$). (Remarque : si les échantillons sont appariés, il suffit que la différence $D$ suive une loi gaussienne mais pas nécessairement $X$ et $Y$.)
 
-Dans le cas de petits échantillons gaussiens, on considérera plutôt un test non paramétrique décrit ci-dessous.
+Dans le cas de petits échantillons non gaussiens, on considérera plutôt un test non paramétrique décrit ci-dessous.
 
 ## Cas de petits échantillons non gaussiens
 
@@ -443,7 +443,7 @@ On souhaite tester si le générateur $runif$ de R simule bien des
   réalisations de \vas de loi uniforme.
 
 
-1. Simuler un échantillon $x$ de $n=20$ \vas de loi uniforme sur
+1. Simuler un échantillon $x$ de taille $n=20$ \vas de loi uniforme sur
   $[0,1]$.
   
 2. Tracer la fonction de répartition empirique de l'échantillon $x$

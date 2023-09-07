@@ -1,0 +1,525 @@
+---
+title: 'Correction Fiche 3 : Tests et régression linéaire'
+output:
+  html_document: default
+  html_notebook: default
+date: "Septembre 2023"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+# Exercices
+
+## Exercice 1
+
+### Question 1
+```{r}
+# a) échantillon de variables aléatoires de loi uniforme sur [0,1] :
+
+x= runif(20)
+  
+# b) fonction de répartition empirique :  
+fn=ecdf(x)
+plot(fn, verticals=TRUE, do.points=FALSE)
+  
+# c) superposer la fonctin de répartition de la loi  uniforme sur [0,1]
+u=seq(0,1,by=0.01)
+y=punif(x)
+lines(x,y,col=2)
+
+## Avec ggplot
+data_ecdf=data.frame(x=x,ecdf=fn(x),y=punif(x))
+
+ggplot(data_ecdf,aes(x=x))+geom_step(aes(y=ecdf))+geom_line(aes(y=y),color="red")
+
+```
+
+
+On effectue le test de Kolmogorov-Smirnov.
+```{r}
+
+
+# test de Kolmagorov Smirnov
+ks.test(x,'punif')
+
+```
+
+La p-valeur est très élevée, il y a donc de grandes chances que l'échantillon simulé provienne bien d'une loi uniforme (heureusement !).
+
+
+## Exercice 2
+
+### Question 1
+```{r}
+usureA=c(13.2,8.2,10.9,14.3,10.7,6.6,9.5,10.8,8.8,13.3)
+usureB=c(14,8.8,11.2,14.2,11.8,6.4,9.8,11.3,9.3,13.6)
+
+data_usure=data.frame(usure=c(usureA,usureB),chaussure=rep(c("A","B"),each=10))
+
+ggplot(data_usure,aes(x=chaussure,y=usure))+geom_boxplot()
+
+
+shapiro.test(usureA)
+shapiro.test(usureB)
+```
+
+
+Comme les échantillons sont de petite taille, on commence par faire un test de Shapiro-Wilk pour savoir si on peut faire une hypothèse de normalité.
+Les p-valeurs sont grandes dont on valide cette hypothèse, on va pouvoir faire un test de Student.
+
+### Question 2
+
+Modèle : 
+Soit $X_i$ l'usure (i.e. le nombre de semaines avant la dégradation) de la chaussure portée par le $i$-ème sportif dans le groupe A
+Soit $Y_j$ l'usure (i.e. le nombre de semaines avant la dégradation) de la chaussure portée par le $j$-ème sportif dans le groupe  B
+On suppose d'après la question 1 que $X_i \overset{iid}{\sim} \mathcal{N}({\mu_A,\sigma_A^2})$ et $Y_j \overset{iid}{\sim} \mathcal{N}({\mu_B,\sigma_B^2})$.
+
+
+Hypothèses :
+
+$H_0$ : Il n'est pas intéressant de changer de modèle, i.e. l'usure des semelles A est (inférieure ou) égale à celle des semelles B ($\mu_A =\mu_B$)
+
+$H_1$ : Il est intéressant de changer de modèle, i.e les semelles A s'usent plus vite que les semelles B $\mu_A < \mu_B$.
+
+```{r}
+
+t.test(usureA, usureB,alternative="less")
+```
+ La p-valeur est largement supérieure à $5\%$, on ne peut pas conclure que le nouveau modèle soit meilleur.
+ 
+ 
+### Question 3
+ 
+ Si les semelles ont été portées successivement par les mêmes sportifs, les échantillons $X$ et $Y$ sont appariés.
+
+Modèle : 
+Soit $X_i$ l'usure (i.e. le nombre de semaines avant la dégradation) de la chaussure du modèle A portée par le $i$-ème sportif
+Soit $Y_i$ l'usure (i.e. le nombre de semaines avant la dégradation) de la chaussure du modèle B portée par le $i$-ème sportif 
+On suppose toujours que $X_i \overset{iid}{\sim} \mathcal{N}({\mu_A,\sigma_A^2})$ et $Y_j \overset{iid}{\sim} \mathcal{N}({\mu_B,\sigma_B^2})$.
+
+On va étudier la variable $D_i$ définie par $D_i=X_i-Y_i  \overset{iid}{\sim}\mathcal{N}({\mu,\sigma^2})$
+
+Hypothèses :
+
+$H_0$ : Il n'est pas intéressant de changer de modèle, i.e. l'usure des semelles A est (inférieure ou) égale à celle des semelles B ($\mu=0$)
+
+$H_1$ : Il est intéressant de changer de modèle, i.e les semelles A s'usent plus vite que les semelles B $\mu_A < 0$.
+
+
+```{r}
+
+t.test(usureA, usureB,alternative="less",paired=TRUE)
+
+#ou bien
+D=usureA-usureB
+t.test(D,mu=0,alternative="less")
+```
+ 
+ On trouve cette fois une p-valeur très faible, ce qui suggère que les semelles B s'usent moins vite que le modèle A. 
+ 
+ Pourquoi trouve-t-on une conclusion si différente ?
+ 
+ Dans le premier cas, la statistique de test est :
+ 
+ $$T_1=\frac{\bar{X}-\bar{Y}}{\sqrt{\hat{s}_A^2/10+\hat{s}_B^2/10}}$$
+ et dans le 2e cas :
+ 
+  $$T_2=\frac{\bar{D}}{\sqrt{\hat{s}^2/10}}$$
+ Les numérateurs sont les mêmes car $\bar{D}=\bar{X}-\bar{Y}$ mais ce sont les variances empiriques qui sont très différentes, ce qui va modifier la statistique observée. On peut le vérifier :
+ 
+```{r}
+
+sqrt(var(usureA)/10+var(usureB)/10)
+sqrt(var(D)/10)
+```
+ 
+## Exercice 3
+
+On va effectuer un test de comparaison de moyennes sur des échantillons appariés (car les mesures sont faites sur les mêmes patients).
+On va donc étudier la différence entre les deux échantillons, que l'on commence par représenter :
+
+```{r}
+x <- c(1.83,  0.50,  1.62,  2.48, 1.68, 1.88, 1.55,1.2, 0.7)
+y <- c(0.878, 0.647, 0.598, 2.05, 1.06, 1.29, 1.06, 3.14, 1.29)
+d=x-y
+boxplot(d)
+
+```
+
+Cette différence n'a pas l'air centrée en 0. Pour savoir quel test effectuer, commençons par regarder si l'échantillon est gaussien (remarque : ici on n'a pas besoin que les deux échantillons soient gaussiens mais que la différence le soit.)
+
+```{r}
+shapiro.test(d)
+```
+
+La p-valeur est inférieure à $5\%$, il n'est pas raisonnable de considérer que l'échantillon est gaussien. On va donc faire un test non paramétrique de Wilcoxon.
+
+\underline{Modèle} : $X_i$ la mesure de l'anxiété du patient $i$ avant le tranquilisant 
+
+$Y_i$ la mesure de l'anxiété du patient $i$ après le tranquilisant 
+
+On pose $D_i=X_i-Y_i$, on suppose les $D_i$ iid de loi inconnue et d'espérance $\mu$.
+
+\underline{Hypothèse} :
+
+$H_0$ : le traitement n'est pas effice $\mu=0$
+
+$H_1$ : traitement est efficace $\mu > 0$
+
+
+```{r}
+wilcox.test(x, y, paired = TRUE, alternative = "greater")
+```
+
+La p-valeur est largement supérieure à $5\%$, on ne peut pas considérer que le tranquilisant est efficace.
+
+## Exercice 4 : Régression linaire simple (cas $p=1$)
+
+### Question1
+Importation du jeu de données :
+
+
+```{r, echo = T}
+ozone <- read.table("ozone.txt", header = TRUE)
+summary(ozone)
+```
+
+Ce sont donc les première et troisième colonnes que l'on va garder.
+
+
+```{r, echo = T}
+ozone <- ozone[, c("maxO3", "T12")]
+summary(ozone)
+```
+
+
+Représentation du nuage de points :
+
+
+```{r, echo = T}
+library(ggplot2)
+ggplot(ozone) + aes(x = T12, y = maxO3) + geom_point()
+```
+
+
+
+### Question 2
+
+Un ajustement linéaire ne paraît pas absurde.
+
+### Question 3
+Calcul des coefficients de la droite de régression :
+
+
+```{r, echo = T}
+reg <- lm(maxO3~T12, data = ozone)
+summary(reg)
+```
+
+
+On voit donc que $\hat\beta_0\approx-27.4$ et $\hat\beta_1\approx 5.5$.
+
+### Question 4
+Le résultat de l'appel à la fonction **lm** ci-dessus est une liste dont voici les éléments
+
+
+```{r, echo = T}
+names(reg)
+```
+
+
+
+### Question 5
+On obtient donc les coefficients très facilement :
+
+
+```{r, echo = T}
+beta <- reg$coefficients
+beta
+```
+
+
+L'écart-type résiduel (ou **Residual Standard Error**) est défini de façon générale par
+$$\hat\sigma=\sqrt{\frac{1}{n-p}\sum_{i=1}^n\hat\varepsilon_i^2}=\sqrt{\frac{1}{n-p}\sum_{i=1}^n(y_i-\hat y_i)^2}=\sqrt{\frac{1}{n-p}\sum_{i=1}^n(y_i-\hat\beta_0-\hat\beta_1 x_i)^2}.$$
+Dans notre cas ceci donne :
+
+
+```{r, echo = T}
+SCR <- sum((ozone$maxO3 - (beta[1] + beta[2]*ozone$T12))^2)
+n <- nrow(ozone)
+sigmahat <- sqrt(SCR/(n - 2))
+sigmahat
+```
+
+
+
+on retrouve bien la **Residual Standard Error** du résumé ci-dessus.
+
+### Question 6
+Représentation de la droite de régression et du centre de gravité :
+
+
+```{r, echo = T}
+plot1 <- ggplot(ozone) + aes(x = T12, y = maxO3) + geom_point() + geom_smooth(method = 'lm', se = F)
+plot1 <- plot1 + geom_point(x = mean(ozone$T12), y = mean(ozone$maxO3), colour = "red", shape = 3)
+plot1 <- plot1 + geom_text(x = mean(ozone$T12), y = mean(ozone$maxO3), label = "G", colour = "red", vjust = 1.5)
+plot1
+```
+
+
+
+
+### Question 7
+Représentation des résidus :
+
+
+
+
+```{r, echo = T}
+n <- nrow(ozone)
+data_reg=data.frame(obs=1:n,residus=residuals(reg))
+ggplot(data_reg,aes(x=obs,y=residus))+geom_point() + xlab("jour") + ylab("résidus")
+```
+
+
+### Question 8
+Il est plus judicieux de regarder les résidus studentisés. En effet, si l'hypothèse d'erreurs gaussiennes centrées homoscédastiques est vérifiée, on sait que ceux-ci sont distribués selon une loi de Student à $n-3=109$ degrés de liberté :
+
+
+```{r, echo = T}
+n <- nrow(ozone)
+data_reg=data.frame(obs=1:n,residus=rstudent(reg))
+ggplot(data_reg,aes(x=obs,y=residus))+geom_point() + ylab("résidus studentisés")
+```
+
+
+
+
+On constate que 4 valeurs sur 112 sont à l'extérieur de l'intervalle de confiance à 95%, ce qui est raisonnable. 
+
+### Question 9
+Si on superpose la densité d'une loi de Student à $n-3=109$ degrés de liberté et un estimateur de la densité, on constate également une bonne adéquation :
+
+
+
+```{r, echo = T}
+plot2 <- ggplot(data.frame(rstudent(reg)), aes(x = rstudent(reg)))
+plot2 <- plot2 + geom_line(stat = "density") + stat_function(fun = dt, args = list(df = 109), col = "red")
+plot2
+```
+
+
+
+### Question 10 
+La valeur prédite est tout simplement :
+
+
+```{r, echo = T}
+maxO3p <- beta[1] + beta[2]*25
+maxO3p
+```
+
+### Question 11
+A l'aide de la fonction **predict** :
+
+
+```{r, echo = T}
+demain <- data.frame(25)
+colnames(demain) <- "T12"
+predict(reg, newdata = demain)
+```
+
+Si on veut, en outre, un intervalle de prédiction à 95% :
+
+```{r, echo = T}
+predict(reg, newdata = demain, interval = "prediction")
+```
+
+
+
+## Exercice 5 : Régression linéaire multiple (cas $p>1$)
+
+### Question 1
+Importation du jeu de données :
+
+
+```{r, echo = T}
+ozone <- read.table("ozone.txt", header = TRUE)
+summary(ozone)
+ozone <- ozone[, 1:11]
+```
+
+
+### Question 2 
+Résumé du data-frame :
+
+
+```{r, echo = T}
+summary(ozone)
+```
+
+
+### Question 3
+Régression linéaire
+
+
+```{r, echo = T}
+reg <- lm(maxO3~., data = ozone)
+```
+
+### Question 4
+Résumé du modèle linéaire :
+
+
+```{r, echo = T}
+summary(reg)
+```
+
+
+
+Testées une par une, les seules variables significatives au niveau 5% sont **maxO3v** et **Ne9**, mais la régression étant multiple et les variables explicatives non orthogonales, il est délicat d'utiliser ces tests. En effet, le test sur un coefficient revient à tester la significativité d'une variable alors que les autres sont dans le modèle. Autrement dit, cela revient à tester que la variable n'apporte pas d'information supplémentaire sachant que toutes les autres variables sont dans le modèle. Il est donc important et plus pertinent d'appliquer des procédures de choix de modèle comme ci-dessous.
+
+Par ailleurs, la **F-statistic** correspond à la statistique du test de Fisher global vu en cours, laquelle revient à tester s'il y a, en plus de la constante, au moins une variable explicative significative parmi les 10 variables proposées. On peut l'exprimer à partir du coefficient de détermination $R^2$ :
+$$F=\frac{n-p}{p-1}\times\frac{R^2}{1-R^2}.$$
+Le $R^2$ est le **Multiple R-squared** du résumé, qui vaut $0.764$ d'où
+
+
+```{r, echo = T}
+F <- (112 - 11)/(11 - 1)*0.7638/(1 - 0.7638)
+F
+```
+
+
+
+On retrouve bien la **F-statistic** du résumé.
+
+### Question 5
+Choix de variable par le critère d'information bayésien (BIC) :
+
+
+```{r, echo = T}
+library(leaps)
+choix <- regsubsets(maxO3~., data = ozone, nbest = 1, nvmax = 11)
+plot(choix, scale="bic")
+```
+
+
+
+
+Le critère est optimisé pour la ligne en haut du graphique. Nous conservons donc, pour le critère BIC, le modèle à 4 variables (en plus de la constante) : **T12**, **Ne9**, **Vx9** et **maxO3v**. 
+
+### Question 6
+Nous définissons ainsi un nouveau modèle avec ces variables :
+
+
+```{r, echo = T}
+regbis <- lm(maxO3~T12 + Ne9 + Vx9 + maxO3v, data = ozone)
+summary(regbis)
+library(leaps)
+choixbis <- regsubsets(maxO3~T12 + Ne9 + Vx9 + maxO3v, data = ozone, nbest = 1, nvmax = 5)
+plot(choixbis, scale = "bic")
+```
+
+## Exercice 6
+
+### Question 1
+
+```{r}
+ozone <- read.table("ozone.txt",header=TRUE)
+summary(ozone)
+ozone <- ozone[,c("maxO3","vent")]
+```
+
+
+### Question 2
+
+```{r}
+summary(ozone)
+```
+
+On constate que c'est le vent d'ouest qui est dominant.
+
+
+### Question 3
+
+Construction des boxplots :
+```{r}
+library(ggplot2)
+ggplot(ozone)+aes(x=vent,y=maxO3)+geom_boxplot() 
+```
+
+La distribution du max de l'ozone diffère selon la direction du vent : par exemple, le niveau d'ozone est sensiblement différent selon que le vent est d'est ou d'ouest. Il semble donc en effet y avoir un effet vent, c'est ce que nous allons vérifier dans la suite.
+
+### Question 4
+
+Pour analyser la significativité du facteur vent, on utilise à nouveau la fonction **lm** dans un premier temps, puis la fonction **anova**.
+```{r}
+modele <- lm(maxO3~vent,data=ozone)
+summary(modele)
+anova(modele)
+```
+
+   + La probabilité critique associée au test de Fisher vaut environ 0.02, donc au niveau de risque de 5%, on rejette $H_0$. Autrement dit, il existe au moins une modalité de la variable vent (i.e. une direction du vent) qui est significative pour expliquer le max de l'ozone.
+   + Comme d'habitude, ce modèle suppose les $\varepsilon_{ij}$ gaussiens indépendants centrés et de même variance.
+
+6. Pour analyser les résidus studentisés, comme en régression linéaire, on fait appel à la fonction **rstudent**.
+   + Représentation des résidus studentisés : 
+```{r}
+n <- nrow(ozone)
+df <- data.frame(index=1:n,res=rstudent(modele))
+ggplot(df)+aes(x=index,y=res)+geom_point()
+```
+   
+   + Représentation des résidus studentisés en fonction du vent :
+
+```{r}
+df2 <- data.frame(df,vent=ozone$vent)
+ggplot(df2)+aes(x=index,y=res)+geom_point()+facet_grid(.~vent)
+``` 
+   
+   + Boîtes à moustaches :
+```{r}
+library(ggplot2) 
+ggplot(df2)+aes(x=vent,y=res)+geom_boxplot()
+```
+
+7. On revient aux résultats de la fonction **lm**.
+   + Résumé :
+```{r}
+summary(modele)
+```
+
+C'est le vent d'est qui est pris comme référence car c'est le premier par ordre alphabétique.
+
+   + Le modèle s'écrit donc pour le vent d'est : 
+   $$y_{E,j}=105.6+\varepsilon_{E,j}$$ 
+   Pour le vent de nord, on obtient : 
+   $$y_{N,j}=105.6-19.471+\varepsilon_{N,j}=86.129+\varepsilon_{N,j}$$
+Et ainsi de suite.
+
+   + Avec une p-value de 0.77, le vent de sud est comparable au vent d'est du point de vue de l'effet sur l'ozone. Ceci se voyait d'ailleurs sur le boxplot initial :
+   
+```{r}
+ggplot(ozone)+aes(x=vent,y=maxO3)+geom_boxplot() 
+```
+
+
+8. Résumons le nouveau modèle :
+```{r}
+modele2 <- lm(maxO3~vent,data=ozone)
+summary(modele2) 
+```
+
+Cette fois, c'est la deuxième modalité (par ordre alphabetique) qui est prise comme référence, c'est-à-dire le vent de nord.
+
+9. Pour le vent du nord, on retrouve bien le résultat ci-dessus :
+$$y_{N,j}=86.129+\varepsilon_{N,j}.$$
+Pour retrouver par exemple le vent d'est : $$y_{E,j}=86.129+19.471+\varepsilon_{E,j}=105.6+\varepsilon_{E,j},$$ qui correspond bien au coefficient ci-dessus, etc.
+
+10. Les tests sur les coefficients ont changé (cf. les p-values) : on voit par exemple que c'est le vent d'ouest qui ressemble au vent du nord, c'est-à-dire des vents de mer. Néanmoins, le résultat du test de Fisher de significativité globale est exactement le même, ce qui est bien logique.
+
