@@ -3,7 +3,7 @@ title: 'Fiche 1 : Introduction à R'
 output:
   html_document: default
   html_notebook: default
-date: "Septembre 2022"
+date: "Septembre 2025"
 editor_options: 
   chunk_output_type: console
 ---

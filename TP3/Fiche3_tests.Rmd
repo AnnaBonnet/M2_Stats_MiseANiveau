@@ -438,26 +438,7 @@ La commande **anova(res)** renvoie notamment la p-valeur associée au test de Fi
 
 # Exercices
 
-## Exercice 1
-On souhaite tester si le générateur $runif$ de R simule bien des
-  réalisations de \vas de loi uniforme.
 
-
-1. Simuler un échantillon $x$ de taille $n=20$ \vas de loi uniforme sur
-  $[0,1]$.
-  
-2. Tracer la fonction de répartition empirique de l'échantillon $x$
-  (utiliser la fonction $ecdf$). Vérifier que vous comprenez bien
-  le graphe de la fonction de répartition empirique (fonction en
-  escalier, avec des marches de hauteur $1/n$ et de largeur $x_{(i+1)}-x_{(i)}$).
-
-3. Superposer la fonction de répartition de la loi uniforme sur
-  $[0,1]$. Commenter. Vous relancerez les questions 1 à 3 pour plusieurs
-  échantillons simulés $x$.
-
-4. Faire le test de Kolmogorov Smirnov pour tester si l'échantillon
-  $x$ est bien distribué selon la loi uniforme sur
-  $[0,1]$.
 
 <!-- ## Exercice 2 -->
 
@@ -482,7 +463,7 @@ On souhaite tester si le générateur $runif$ de R simule bien des
 
 <!-- 4. Comment peut-on interpréter tous ces résultats ? -->
 
-## Exercice 2
+## Exercice 1
 
 A chaque début de saison, les entraîneurs d'une grande équipe d'athlétisme équipent leurs coureurs en vêtements et chaussures. Le choix des chaussures est particulièrement important puisque des chaussures de mauvaise qualité peuvent altérer la performance des athlètes. Les entraîneurs hésitent entre garder le modèle qu'ils ont actuellement (modèle A) ou bien s'ils essayent un nouveau type de semelles (modèle B). Ils vont changer de modèle uniquement s'il s'avère plus performant que leur modèle actuel. Pour se décider , ils réalisent l'expérience est la suivante : 10 sportifs portent les semelles A, et 10 autres sportifs portent les semelles B pour le même type d'entraînement. On relève les résultats de l'usure des semelles dans chacun des groupes, c'est-à-dire le nombre de semaines avant de constater une dégradation de la semelle :
 
@@ -497,7 +478,7 @@ Sportifs
 
 3. On suppose maintenant que les semelles A et B sont portées tour à tour par les mêmes sportifs. Quelle différence y a-t-il avec l'expérience précédente ? Ecrire le modèle, les hypothèses et faire le test avec les mêmes données que précédemment. Commenter. 
 
-## Exercice 3 
+## Exercice 2
 
 On étudie l'effet d'un tranquillisant sur 9 patients. Voici des mesures
 traduisant l'anxiété avant et après le traitement. Le traitement est-il
@@ -508,7 +489,7 @@ mesures=data.frame(avant=c(1.83, 0.50 , 1.62 , 2.48 ,1.68, 1.88 ,1.55 ,1.2, 0.7)
 mesures
 ```
 
-## Exercice 4 : régression linéaire simple
+## Exercice 3 : régression linéaire simple
 
 Nous allons étudier le jeu de donnée ozone.txt. La pollution de l'air constitue une des préoccupations majeures
 de santé publique. De nombreuses études épidémiologiques ont permis de
@@ -541,7 +522,7 @@ $$Y=\beta_0+\beta_1 X+ \epsilon$$
 11. Retrouver cette valeur à l'aide de la fonction **predict** : pour cela, on construira un data-frame **demain** avec la valeur 25 et pour nom de colonne **T12**. Donner l'intervalle de prédiction à 95\%.
  
  
-## Exercice 5 : Régression linéaire multiple 
+## Exercice 4 : Régression linéaire multiple 
 
 Nous reprenons les données ozone.txt. Nous souhaitons analyser la relation entre le maximum journalier de la concentration en ozone (en $\mu\mathrm{g}/\mathrm{m}^3$) et la température à différentes heures de la journée, la nébulosité à différentes heures de la journée, la projection du vent sur l'axe Est-Ouest à différentes heures de la journée et la  concentration maximale en ozone de la veille du jour considéré. Nous disposons de 112 données relevées durant l'été 2001.
 
@@ -561,7 +542,7 @@ plot(choix,scale="bic")
 
 6. Reprendre la régression multiple des questions précédentes avec ce modèle.   
 
-## Exercice 6 : Analyse de la variance
+## Exercice 5 : Analyse de la variance
 
 Nous étudions de nouveau les données ozone.txt.
 

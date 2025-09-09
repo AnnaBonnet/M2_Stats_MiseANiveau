@@ -4,7 +4,7 @@ output:
   html_document: default
   html_notebook: default
   pdf_document: default
-date: "Septembre 2022"
+date: "Septembre 2025"
 editor_options: 
   chunk_output_type: console
 ---
@@ -254,7 +254,7 @@ p2 + scale_x_continuous(breaks = seq(0.5, 3, by = 0.5)) + scale_y_continuous(nam
 # 4. Exercices
 
 ## 4.1 Jeu de données **ronfle**
-Reprenons le jeu de données <a href="https://drive.google.com/file/d/1VL-CbFzkM5PRBxOZlndnCtQLPrvw3xn0/view?usp=sharing">snore.txt</a> de la fiche précédente.
+Reprenons le jeu de données **snore.txt** de la fiche précédente.
 
 1. Représenter la variable **age** sous forme d'histogramme.
 2. Ajouter un titre au graphique précédent
@@ -290,7 +290,7 @@ de la variable **ronfle** à l'aide d'un boxplot.
 
 ## 4.4 Harry Potter
 
-1. En utilisant la fonction **load** =, charger le jeu de données Harry.Rdata qui contient le nombre d'occurrences du nom "Harry" dans chaque tome de la saga Harry Potter puis afficher les 10 premières lignes du jeu de données.
+1. En utilisant la fonction **load**, charger le jeu de données Harry.Rdata qui contient le nombre d'occurrences du nom "Harry" dans chaque tome de la saga Harry Potter puis afficher les 10 premières lignes du jeu de données.
 2. Représenter une courbe du nombre d'occurrence en fonction du nombre de chapitre, avec  une couleur différente pour chaque livre. 
 3. Utiliser la palette de couleurs "Dark2" et changer le nom des axes.
 4. Représenter la même chose mais avec un graphique par livre.
