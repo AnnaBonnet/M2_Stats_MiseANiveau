@@ -1,0 +1,270 @@
+---
+title: 'Correction Fiche 2 : Représentation des données avec ggplot2'
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+date: "Septembre 2025"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 4. Exercices 
+
+## 4.1 Jeu de données ronfle 
+
+### Question 1
+ Histogramme de l'âge
+
+
+```{r, echo = T}
+library('ggplot2')
+donnees <- read.table(file = "snore.txt", header = T)
+ggplot(donnees) + aes(x = age) + geom_histogram()
+```
+
+
+Si on ne veut pas les effectifs par classe d'âge, mais les densités par classe d'âge, on peut procéder comme suit
+
+
+```{r, echo = T}
+ggplot(donnees) + aes(x = age, y= ..density..) + geom_histogram()
+```
+
+
+
+### Question 2
+ L'ajout d'un titre est très simple
+
+
+```{r, echo = T}
+ggplot(donnees) + aes(x = age, y = ..density..) + geom_histogram() + ggtitle("Histogramme des âges")
+```
+
+
+
+### Question 3
+
+Pour préciser les classes, on utilise l'argument **breaks**
+
+
+```{r, echo = T}
+ggplot(donnees)+aes(x = age, y = ..density..) + geom_histogram(breaks = c(20, 40, 55, 80)) + ggtitle("Histogramme des âges")
+```
+
+
+### Question 4
+La boîte à moustaches
+
+```{r, echo = T}
+ggplot(data = donnees, aes(x = factor(0), y = age)) + geom_boxplot() + xlab("") + scale_x_discrete(breaks = NULL)
+```
+
+
+### Question 5
+Pour subdiviser en plusieurs figures, on utilise le package **gridExtra** (à installer si besoin)
+
+
+```{r, echo = T}
+library(gridExtra)
+plot1 <- ggplot(data = donnees, aes(x = factor(0), y = age)) + geom_boxplot()
+plot1 <- plot1 + xlab("") + scale_x_discrete(breaks = NULL)
+plot2 <- ggplot(donnees) + aes(x = age, y = ..density..) 
+plot2 <- plot2 + geom_histogram(breaks = c(20, 40, 55, 80)) + ggtitle("Histogramme des âges")
+grid.arrange(plot1, plot2, nrow = 1, ncol = 2)
+```
+
+### Question 6
+
+```{r, echo = T}
+ggplot(donnees) + aes(x = sexe) + geom_bar()
+```
+
+
+Une autre solution consiste à utiliser la fonction **qplot**
+
+
+```{r, echo = T}
+qplot(donnees$sexe, xlab = "")
+```
+
+
+### Question 7 
+  Un diagramme en barres pour la variable quantitative discrète **alcool** s'obtient très facilement
+
+
+```{r, echo = T}
+ggplot(donnees) + aes(x = alcool) + geom_bar()
+```
+
+transformée en variable qualitative avec as.factor
+```{r, echo = T, eval = F}
+ggplot(donnees) + aes(x = as.factor(alcool)) + geom_bar()
+```
+
+### Question 8
+Représentation du poids en fonction de la taille :
+
+
+```{r, echo = T}
+g1 <- ggplot(donnees) + aes(x = taille, y = poids) + geom_point()
+g1
+```
+
+
+### Question 9
+Représentation de la variable **age** en fonction de la variable **ronfle** :
+
+
+```{r, echo = T}
+ggplot(donnees) + aes(x = ronfle, y = age) + geom_boxplot()
+```
+
+
+Conclusion : les ronfleurs sont en moyenne plus âgés.
+
+# 4.2 Graphes de fonctions 
+
+### Question 1
+
+Tracé de la fonction sinus :
+
+
+```{r, echo = T}
+g1 <- ggplot(data.frame(x = seq(0, 4*pi, by = 0.01)), aes(x = x))
+g1 <- g1 + stat_function(fun = sin, color = "red")
+g1
+```
+
+
+### Question2
+Superposition de la fonction cosinus :
+
+
+```{r, echo = T}
+g2 <- g1 + stat_function(fun = cos)
+g2
+```
+
+
+### Question 3
+Ajout des deux droites 
+
+
+```{r, echo = T}
+g3 <- g2 + geom_hline(yintercept = c(-1, 1), col = "green")
+g3
+```
+
+
+### Question 4 
+ Ajout de la droite d'équation $y=x$ :
+
+
+```{r, echo = T}
+id <- function(x){x}
+g4 <- g3 + stat_function(fun = id,color = "blue",linetype = 3)
+# g4 <- g3 + stat_function(fun = id,color = "blue",linetype = "dashed")
+g4
+```
+
+
+## 4.3. Comparaisons de variables
+On souhaite comparer la distribution des variables **taille** et **poids** suivant les modalités de la variable **ronfle**.
+
+### Question 1
+Comparaison de la distribution de la variable **taille** suivant les modalités de la variable **ronfle** à l'aide d'un boxplot :
+
+
+```{r, echo = T}
+g1 <- ggplot(donnees) + aes(x = ronfle, y = taille) + geom_boxplot()
+g1
+```
+
+
+Le fait de ronfler ou non semble indépendant de la taille.
+
+### Question 2
+Pour la variable poids, même conclusion :
+
+
+```{r, echo = T}
+g2 <- ggplot(donnees) + aes(x = ronfle, y = poids) + geom_boxplot()
+g2
+```
+
+
+### Question 3
+Juxtaposition des deux figures :
+
+
+```{r, echo = T}
+library(gridExtra)
+plot1 <- g1
+plot2 <- g2
+grid.arrange(plot1, plot2, nrow = 1, ncol = 2)
+```
+
+
+## Exercice 4
+
+```{r}
+load("Harry.Rdata")
+head(Harry)
+```
+
+
+```{r}
+ggplot(Harry, aes(x = Chap, y = Nb_rep, color = Livre)) + geom_point() + geom_line()
+```
+
+
+```{r}
+ggplot(Harry, aes(x = Chap, y = Nb_rep, color = Livre)) + geom_point() + geom_line()+
+  scale_color_brewer(palette = "Dark2")+
+  xlab ("Numéro de chapitre") +
+  ylab("Nombre de 'Harry'")
+```
+
+```{r}
+
+p <- ggplot(data = Harry, aes(x = Chap, y = Nb_rep,color = Livre )) +
+  geom_point( shape = 2) +
+  geom_line() + scale_color_brewer(palette = "Dark2")+
+  xlab ("Numero de chapitre") +
+  ylab("Nombre de 'Harry'")
+p
+```
+
+
+```{r}
+
+p <- ggplot(data = Harry, aes(x = Chap, y = Nb_rep,color = Livre )) + facet_grid(.~Livre)+
+  geom_point( shape = 2) +
+  geom_line() + scale_color_brewer(palette = "Dark2")+
+  xlab ("Numero de chapitre") +
+  ylab("Nombre de 'Harry'")
+p
+```
+
+
+```{r}
+p2 <- ggplot(data = Harry, aes(x = Livre, y = Nb_rep))
+p2 + geom_boxplot()
+```
+
+
+```{r}
+p2 <- ggplot(data = Harry, aes(x = Livre))
+p2 + geom_boxplot(aes(y=Nb_rep)) + geom_point(aes(y=mean(Nb_rep)),color="red",shape=4)
+```
+
+```{r}
+ ggplot(data = Harry, aes(x = Livre)) + geom_boxplot(aes(y=Nb_rep)) + scale_x_discrete(labels=seq(1,7,1))+ geom_point(aes(y=mean(Nb_rep)),color="red",shape=4)+xlab("Tome")
+```
+
+
